@@ -1204,6 +1204,7 @@ async function apriLeo(){
   apriGioco();
 }
 function route(){
+  if (location.hash === '#leo' || location.hash === '#genitori') { try { if (dlg.open) dlg.close(); } catch(e) {} }
   if (location.hash === '#leo') { apriLeo(); return; }
   if (LEO) { LEO = false; GS = null; $('#gioco').classList.add('hidden'); document.documentElement.style.overflow = ''; }
   const gen = location.hash === '#genitori';
@@ -1216,7 +1217,7 @@ window.addEventListener('hashchange', route);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (location.hash === '#leo') { sincronizza(); } else if (location.hash === '#genitori') { if (PIN && !GS) gCarica(); } else carica(true); } });
 setInterval(() => { if (!document.hidden && location.hash !== '#genitori' && location.hash !== '#leo') carica(true); }, 30000);
 route();
-if (!nome && location.hash !== '#genitori' && location.hash !== '#leo') setTimeout(() => { if (!nome && !dlg.open && location.hash !== '#leo') chiediNome(); }, 900);
+if (!nome && location.hash !== '#genitori' && location.hash !== '#leo') setTimeout(() => { if (!nome && !dlg.open && !location.hash.startsWith('#leo') && location.hash !== '#genitori') chiediNome(); }, 900);
 })();
 </script>
 </body>
