@@ -393,7 +393,7 @@ nav.barra button.leo{color:var(--abete-2)}
       </section>
       <section class="box hidden" data-tab="gioco">
         <h2>🎲 Quale preferisci?</h2>
-        <p class="sub">Leo vede due regali alla volta (uno a sinistra e uno a destra col telefono in orizzontale, uno sopra l'altro in verticale) e tocca quello che gli piace di più. La prima partita su un gruppo è più lunga (con tutti i regali 30 scelte: ognuno compare almeno una volta), così c'è subito una prima classifica; le partite dopo sono di 16 scelte e la rendono più precisa. Ogni tanto torna una coppia già vista, a lati invertiti, per vedere se Leo conferma. Con 3 partite in tutto la stima è già buona.</p>
+        <p class="sub">Leo vede due regali alla volta (uno a sinistra e uno a destra col telefono in orizzontale, uno sopra l'altro in verticale) e tocca quello che gli piace di più. La prima partita su un gruppo è più lunga (con tutti i regali 50 scelte: ognuno compare circa due volte, e dopo il primo giro torna ogni tanto una coppia già vista a lati invertiti), così c'è subito una prima classifica; le partite dopo sono di 16 scelte e la rendono più precisa. Anche lì ogni 6 scelte torna una coppia già vista, a lati invertiti, per vedere se Leo conferma. Con 3 partite in tutto la stima è già buona.</p>
         <button class="btn primario full" id="g-gioca" type="button">▶ Gioca con Leo</button>
         <p class="small" style="margin:10px 0 0">Il gioco si apre anche dal pulsante 🦖 Leo in fondo alla lista, con la password del gioco (si cambia nelle Impostazioni). Per un'icona sulla Home: aprite il link in Safari, poi Condividi → «Aggiungi alla schermata Home». <button class="btn link" id="g-link-leo" type="button" style="padding:0">Copia il link per Leo</button></p>
         <div id="g-gioco-stat" class="small" style="margin-top:12px"></div>
@@ -965,7 +965,7 @@ function editRegalo(g, pre, modo){
 }
 
 // =================== GIOCO «QUALE PREFERISCI» ===================
-const ROUND = 16, PRIMA_MAX = 30, EMIVITA_GIORNI = 14;
+const ROUND = 16, PRIMA_MAX = 50, EMIVITA_GIORNI = 14;
 const J = {
   get(k){ try { return JSON.parse(LS.get(k, '[]')) || []; } catch(e){ return []; } },
   set(k, v){ LS.set(k, JSON.stringify(v)); }
@@ -1038,7 +1038,9 @@ function prossimaCoppia(){
   const ids = GS.items.map(g => g.id), log = confronti(), st = statistiche(ids, log);
   const recenti = GS.recenti.slice(-2).flat();
   // ogni 6 scelte, se possibile, ripropone una coppia già vista a lati invertiti
-  if (!GS.focus && !GS.primo && GS.fatte > 0 && GS.fatte % 6 === 5) {
+  // (nella prima partita solo quando ogni regalo è già comparso una volta)
+  const copertura = Math.min(...ids.map(id => st[id].n)) >= 1;
+  if (!GS.focus && (!GS.primo || copertura) && GS.fatte > 0 && GS.fatte % 6 === 5) {
     const vecchie = log.filter(c => ids.includes(c.a) && ids.includes(c.b) && !recenti.includes(c.a) && !recenti.includes(c.b) && !c.sessione.endsWith('-r'));
     if (vecchie.length) {
       const c = rnd(vecchie);
@@ -1056,13 +1058,19 @@ function prossimaCoppia(){
   if (!pool.length) pool = ids.filter(id => id !== a);
   const consolidati = pool.filter(id => st[id].n >= 2 && !(GS.focus && GS.focus.has(id)));
   let b;
-  if (st[a].n < 2 && consolidati.length >= 3) {
+  if (!GS.primo && st[a].n < 2 && consolidati.length >= 3) {
     // piazzamento di un regalo nuovo: contro un regalo già in classifica di forza simile (sale o scende a ogni scelta)
     const f = forze(ids, log);
     consolidati.sort((x, y) => Math.abs(Math.log(f[x] / f[a])) - Math.abs(Math.log(f[y] / f[a])));
     b = rnd(consolidati.slice(0, 2));
   } else if (log.length < ids.length * 1.5 || Math.random() < 0.25) {
-    const m = Math.min(...pool.map(id => st[id].n)); b = rnd(pool.filter(id => st[id].n === m));
+    const m = Math.min(...pool.map(id => st[id].n)); let pari = pool.filter(id => st[id].n === m);
+    if (copertura && pari.length > 3) {
+      const f = forze(ids, log);
+      pari.sort((x, y) => Math.abs(Math.log(f[x] / f[a])) - Math.abs(Math.log(f[y] / f[a])));
+      pari = pari.slice(0, 3);
+    }
+    b = rnd(pari);
   } else {
     const f = forze(ids, log);
     pool.sort((x, y) => Math.abs(Math.log(f[x] / f[a])) - Math.abs(Math.log(f[y] / f[a])));
@@ -1181,12 +1189,12 @@ function partita(c){
   if (items.length < 2) { toast('Servono almeno due regali'); return; }
   const focus = c.focus ? new Set(c.focus.map(g => g.id)) : null;
   const coppiePossibili = items.length * (items.length - 1) / 2;
-  // prima partita su un gruppo: più lunga, così ogni regalo compare almeno una volta e c'è subito una stima
+  // prima partita su un gruppo: più lunga, così ogni regalo compare circa due volte e c'è subito una stima
   const ids = new Set(items.map(g => g.id));
   const gia = confronti().filter(c2 => ids.has(c2.a) && ids.has(c2.b)).length;
   const primo = !focus && gia < items.length / 2;
   const lunghezza = focus ? Math.min(ROUND, focus.size * 4)
-    : primo ? Math.min(PRIMA_MAX, Math.max(4, Math.ceil(items.length * 0.65)), coppiePossibili)
+    : primo ? Math.min(PRIMA_MAX, Math.max(4, Math.ceil(items.length * 1.1)), coppiePossibili)
     : Math.min(ROUND, Math.max(4, coppiePossibili));
   GS = {cat: c, items, mappa: new Map(items.map(g => [g.id, g])), focus, primo, lunghezza, id: nuovoId(), fatte: 0, recenti: [], pronto: false};
   schermo('campo'); disegnaStelle(); mostraCoppia();
