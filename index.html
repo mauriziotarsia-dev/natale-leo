@@ -168,7 +168,6 @@ nav.barra button.on{color:var(--verde);font-weight:700}
     <div class="wrap" role="group" aria-label="Filtri">
       <button class="chip" data-f="tutti" aria-pressed="true" type="button">Tutti</button>
       <button class="chip" data-f="liberi" aria-pressed="false" type="button">Ancora liberi</button>
-      <button class="chip" data-f="leo" aria-pressed="false" type="button">✏️ Segnati da Leo</button>
       <button class="chip" data-f="miei" aria-pressed="false" type="button">🎁 I miei</button>
       <button class="chip" data-f="prezzo" aria-pressed="false" type="button">€ Dal meno caro</button>
     </div>
@@ -417,7 +416,6 @@ function render(){
 
   let lista = reg.slice();
   if (filtro === 'liberi') lista = lista.filter(g => !g.preso);
-  if (filtro === 'leo') lista = lista.filter(g => g.segno_leo);
   if (filtro === 'miei') lista = lista.filter(g => g.mio);
   if (filtro === 'prezzo') lista.sort((a,b) => (a.prezzo_cent ?? 1e9) - (b.prezzo_cent ?? 1e9));
   const grid = $('#grid'); grid.innerHTML = '';
@@ -428,7 +426,7 @@ function render(){
       : g.preso ? `<div class="stato preso">Già preso${g.preso_da ? ' da ' + esc(g.preso_da) : ''}</div>`
       : `<div class="stato libero">Disponibile</div>`;
     const pt = prezzoTxt(g);
-    card.innerHTML = `<div class="ph"><img alt="" loading="lazy" decoding="async"><div class="badges">${g.segno_leo ? '<span class="b leo">✏️ Leo</span>' : '<span></span>'}${g.eta && g.eta !== '—' ? `<span class="b eta">${esc(g.eta)}</span>` : ''}</div></div>
+    card.innerHTML = `<div class="ph"><img alt="" loading="lazy" decoding="async"><div class="badges"><span></span>${g.eta && g.eta !== '—' ? `<span class="b eta">${esc(g.eta)}</span>` : ''}</div></div>
       <div class="body"><div class="t">${esc(g.titolo)}</div><div class="meta">${esc(g.marca)}</div>
       <div class="prezzo ${pt ? '' : 'nd'}">${pt ? esc(pt) : 'prezzo su Amazon'}</div>${st}</div>`;
     fillImg($('img', card), g.foto);
@@ -526,7 +524,6 @@ function apriRegalo(id){
   apriDialog(`<img class="foto" alt="${esc(g.titolo)}">
     <h3>${esc(g.titolo)}</h3>
     <div class="small">${esc([g.marca, g.codice && g.codice !== '—' ? 'cod. ' + g.codice : '', g.eta && g.eta !== '—' ? 'età ' + g.eta : ''].filter(Boolean).join(' · '))}</div>
-    ${g.segno_leo ? '<p class="small">✏️ Leo l\'ha segnato sul volantino</p>' : ''}
     <p>${esc(g.descrizione)}</p>
     <div class="amz"><div><div class="p ${pt ? '' : 'nd'}">${pt ? esc(pt) : 'Prezzo: vedi su Amazon'}</div>${li.hint ? `<div class="small">${esc(li.hint)}</div>` : ''}</div>
       ${li.url ? `<a class="btn chiaro mini" href="${esc(li.url)}" target="_blank" rel="noopener">${esc(li.label)} ↗</a>` : `<span class="small">${esc(li.label)}</span>`}</div>
@@ -670,7 +667,7 @@ function gRender(){
     d.appendChild(gImg(g.foto));
     const info = document.createElement('div'); info.className = 'info';
     const p = g.prenotazione;
-    info.innerHTML = `<b>${esc(g.titolo)}</b><div class="small">${esc(prezzoTxt(g) || 'senza prezzo')}${g.visibile ? '' : ' · <span class="tag r">nascosto</span>'}${g.segno_leo ? ' <span class="tag o">✏️ Leo</span>' : ''}
+    info.innerHTML = `<b>${esc(g.titolo)}</b><div class="small">${esc(prezzoTxt(g) || 'senza prezzo')}${g.visibile ? '' : ' · <span class="tag r">nascosto</span>'}
       ${p ? '<br>Preso da <b>' + esc(p.nome) + '</b>' + (p.modo === 'genitori' ? ' (lo comprate voi)' : '') : ''}</div>`;
     const row = document.createElement('div'); row.className = 'row'; row.style.marginTop = '6px';
     const bt = (t, cls, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn mini ' + cls; b.textContent = t; b.onclick = fn; row.appendChild(b); };
@@ -704,10 +701,10 @@ $('#f-imp').onsubmit = async e => {
 $('#g-nuovo').onclick = () => editRegalo(null);
 
 function editRegalo(g){
-  const v = g || {titolo:'', marca:'', codice:'', eta:'', descrizione:'', amazon_url:'', prezzo_cent:null, prezzo_nota:'', segno_leo:true, visibile:true};
+  const v = g || {titolo:'', marca:'', codice:'', eta:'', descrizione:'', amazon_url:'', prezzo_cent:null, prezzo_nota:'', segno_leo:false, visibile:true};
   apriDialog(`<h3>${g ? 'Modifica regalo' : 'Nuovo regalo'}</h3>
     <form id="f-reg">
-      <label class="f" for="r-foto">Foto ${g ? '(per cambiarla)' : '(es. il gioco indicato da Leo)'}</label>
+      <label class="f" for="r-foto">Foto ${g ? '(per cambiarla)' : '(es. la foto del gioco)'}</label>
       <input class="i" id="r-foto" type="file" accept="image/*">
       <label class="f" for="r-titolo">Nome</label><input class="i" id="r-titolo" maxlength="120" required value="${esc(v.titolo)}">
       <label class="f" for="r-url">Link Amazon (o altro negozio)</label><input class="i" id="r-url" type="url" inputmode="url" value="${esc(v.amazon_url)}" placeholder="https://www.amazon.it/dp/…">
@@ -716,7 +713,6 @@ function editRegalo(g){
       <label class="f" for="r-nota">Nota sul prezzo (facoltativa)</label><input class="i" id="r-nota" maxlength="60" value="${esc(v.prezzo_nota)}" placeholder="Es. da circa 30 €">
       <label class="f" for="r-marca">Marca</label><input class="i" id="r-marca" maxlength="60" value="${esc(v.marca)}">
       <label class="f" for="r-desc">Descrizione</label><textarea class="i" id="r-desc" maxlength="300">${esc(v.descrizione)}</textarea>
-      <label class="check"><input type="checkbox" id="r-leo" ${v.segno_leo ? 'checked' : ''}> Segnato da Leo</label>
       <label class="check"><input type="checkbox" id="r-vis" ${v.visibile ? 'checked' : ''}> Visibile ai parenti</label>
       <button class="btn verde full" type="submit">Salva</button>
       ${g && !g.prenotazione ? '<button class="btn link full" id="r-del" type="button">Elimina definitivamente</button>' : ''}
@@ -728,7 +724,7 @@ function editRegalo(g){
         const pr = $('#r-prezzo', b).value.trim().replace(/[€\s]/g, '').replace(',', '.');
         const dati = {titolo:$('#r-titolo', b).value.trim(), amazon_url:safeUrl($('#r-url', b).value.trim()), eta:$('#r-eta', b).value.trim(),
           prezzo_nota:$('#r-nota', b).value.trim(), marca:$('#r-marca', b).value.trim(), descrizione:$('#r-desc', b).value.trim(),
-          segno_leo:$('#r-leo', b).checked, visibile:$('#r-vis', b).checked, prezzo_cent: pr && !isNaN(+pr) ? String(Math.round(+pr*100)) : ''};
+          segno_leo:false, visibile:$('#r-vis', b).checked, prezzo_cent: pr && !isNaN(+pr) ? String(Math.round(+pr*100)) : ''};
         if (g) dati.id = g.id;
         const f = $('#r-foto', b).files[0]; if (f) dati.foto_dati = await resizeImage(f, 900);
         const r = await gAct('natale_g_regalo_salva', {p_dati:dati}, 'Regalo salvato');
