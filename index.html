@@ -231,13 +231,19 @@ nav.barra button.leo{color:var(--abete-2)}
 .gioco .scelta[data-lato="d"]{box-shadow:0 10px 0 #0f6a47,0 18px 30px rgba(0,0,0,.25)}
 .gioco .scelta:active{transform:translateY(4px) scale(.98)}
 .gioco .scelta img{width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
-.gioco .scelta.vinto{transform:scale(1.06) rotate(-1.5deg);box-shadow:0 0 0 8px var(--oro),0 18px 40px rgba(0,0,0,.4)}
-.gioco .scelta.perso{opacity:.15;transform:scale(.9)}
+.gioco .scelta.vinto{transform:scale(1.06) rotate(-1.5deg);box-shadow:0 0 0 8px var(--oro),0 0 50px 14px rgba(255,194,61,.75),0 18px 40px rgba(0,0,0,.4);animation:g-vinto .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes g-vinto{0%{transform:scale(1)}35%{transform:scale(1.13) rotate(-3deg)}65%{transform:scale(1.02) rotate(1.5deg)}100%{transform:scale(1.06) rotate(-1.5deg)}}
+.gioco .scelta.perso{opacity:.15;transform:scale(.86) translateY(14px);filter:grayscale(.7)}
+.gioco > .fx{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden}
+.fx .part{position:absolute;width:1em;height:1em;margin:-.5em 0 0 -.5em;line-height:1;text-align:center;will-change:transform,opacity}
+.fx .onda{position:absolute;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;border:6px solid var(--oro);box-shadow:0 0 24px var(--oro);animation:g-onda .7s ease-out forwards}
+@keyframes g-onda{from{transform:scale(.3);opacity:1}to{transform:scale(7);opacity:0}}
+.fx .babbo{position:absolute;bottom:-10px;font-size:110px;line-height:1;filter:drop-shadow(0 10px 20px rgba(0,0,0,.4))}
+.gioco .vs.gira{animation:g-gira .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes g-gira{from{transform:scale(.3) rotate(-180deg)}to{transform:none}}
 .gioco .scelta.entra{animation:g-entra .45s cubic-bezier(.3,1.5,.5,1) both}
 .gioco .scelta.entra.d{animation-delay:.08s}
 @keyframes g-entra{from{transform:scale(.7) translateY(20px);opacity:0}to{transform:none;opacity:1}}
-.gioco .st{position:absolute;font-size:36px;pointer-events:none;animation:g-st .9s ease-out forwards}
-@keyframes g-st{from{transform:translate(0,0) scale(.4);opacity:1}to{transform:translate(var(--x),var(--y)) scale(1.25) rotate(40deg);opacity:0}}
 .gioco .inizio{flex:1;overflow:auto;padding:12px 16px calc(24px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
 .gioco .cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:16px;max-width:900px;margin:0 auto}
 .gioco .cat{--c:#2D8CEB;background:#fff;border:0;border-radius:28px;padding:16px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--inchiostro);
@@ -257,7 +263,7 @@ nav.barra button.leo{color:var(--abete-2)}
 @keyframes cade{to{transform:translateY(110vh) rotate(720deg)}}
 .fiocco{animation:none}
 .gioco .stelle{min-width:0}
-@media (prefers-reduced-motion:reduce){.gioco .stelle .slitta.hop,.luci,.gioco::before,.snow,.gioco .scelta.entra,.gioco .fine .grande,.gioco .st,.coriandoli,.gioco .stelle i.on,dialog[open]{animation:none}}
+@media (prefers-reduced-motion:reduce){.gioco .stelle .slitta.hop,.luci,.gioco::before,.snow,.gioco .scelta.entra,.gioco .scelta.vinto,.gioco .vs.gira,.fx .onda,.gioco .fine .grande,.coriandoli,.gioco .stelle i.on,dialog[open]{animation:none}}
 </style>
 </head>
 <body>
@@ -457,6 +463,7 @@ nav.barra button.leo{color:var(--abete-2)}
     </div>
     <button class="basta" id="gioco-fuori" type="button">Basta così</button>
   </div>
+  <div class="fx" id="gioco-fx" aria-hidden="true"></div>
 </div>
 
 <nav class="barra" id="barra">
@@ -1079,27 +1086,147 @@ function prossimaCoppia(){
   return Math.random() < 0.5 ? {s: a, d: b} : {s: b, d: a};
 }
 
-let AC = null;
-function suono(tipo){
-  try {
-    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
-    if (AC.state === 'suspended') AC.resume();
-    const t = AC.currentTime, note = tipo === 'fine' ? [523, 659, 784, 1047, 1319] : tipo === 'via' ? [392, 523] : [784, 1047];
-    note.forEach((f, i) => {
-      const o = AC.createOscillator(), g = AC.createGain(), t0 = t + i * 0.09;
-      o.type = 'triangle'; o.frequency.value = f;
-      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.22, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.28);
-      o.connect(g); g.connect(AC.destination); o.start(t0); o.stop(t0 + 0.3);
-    });
-  } catch(e) {}
+// Suoni sintetizzati (niente file): marimba sulla scala pentatonica, così le scelte in fila fanno una melodia
+// che sale; sonagli della slitta; campanelle ogni 10 scelte; fanfara e applauso alla fine.
+// Su iPhone seguono l'interruttore del silenzioso.
+const PENTA = [523.25, 587.33, 659.26, 783.99, 880, 1046.5, 1174.66, 1318.51, 1567.98, 1760];
+let AC = null, MASTER = null, RUMORE = null;
+function audio(){
+  if (!AC) {
+    const C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
+    AC = new C();
+    const comp = AC.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 4;
+    MASTER = AC.createGain(); MASTER.gain.value = .9; MASTER.connect(comp); comp.connect(AC.destination);
+  }
+  return AC;
 }
-function stelline(el){
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  for (let i = 0; i < 7; i++) {
-    const s = document.createElement('span'); s.className = 'st'; s.textContent = i % 2 ? '⭐' : '✨';
-    const ang = Math.random() * Math.PI * 2, r = 60 + Math.random() * 70;
-    s.style.setProperty('--x', Math.cos(ang) * r + 'px'); s.style.setProperty('--y', Math.sin(ang) * r + 'px');
-    el.appendChild(s); setTimeout(() => s.remove(), 950);
+function inviluppo(g, t0, vol, att, dur){
+  g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + att); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+}
+function nota(f, t0, {tipo = 'marimba', vol = .3, dur = .6} = {}){
+  // marimba: fondamentale con armonici che si spengono subito; campana: parziali non armonici, coda lunga
+  const parz = tipo === 'campana' ? [[1, 1, dur], [2.76, .3, dur * .5], [5.4, .12, dur * .3]] : [[1, 1, dur], [4, .22, .12], [10, .05, .05]];
+  parz.forEach(([m, a, d]) => {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = 'sine'; o.frequency.value = f * m; inviluppo(g, t0, vol * a, .006, d);
+    o.connect(g); g.connect(MASTER); o.start(t0); o.stop(t0 + d + .05);
+  });
+}
+function rumore(){
+  if (!RUMORE) { const n = AC.sampleRate; RUMORE = AC.createBuffer(1, n, n); const d = RUMORE.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; }
+  return RUMORE;
+}
+function colpo(t, freq, q, vol, dur){
+  const src = AC.createBufferSource(), bp = AC.createBiquadFilter(), g = AC.createGain();
+  src.buffer = rumore(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = q; inviluppo(g, t, vol, .003, dur);
+  src.connect(bp); bp.connect(g); g.connect(MASTER); src.start(t, Math.random() * .8, dur + .05);
+}
+function sonagli(t0, colpi = 4, vol = .16){
+  for (let i = 0; i < colpi; i++) {
+    const t = t0 + i * .07 + Math.random() * .015;
+    colpo(t, 7000 + Math.random() * 2000, 2.5, vol, .09);
+    [5900, 7700].forEach(f => {
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = 'sine'; o.frequency.value = f * (1 + Math.random() * .03); inviluppo(g, t, vol * .22, .003, .14);
+      o.connect(g); g.connect(MASTER); o.start(t); o.stop(t + .18);
+    });
+  }
+}
+function applauso(t0, dur = 1.8){
+  for (let t = 0; t < dur; t += .02 + Math.random() * .03) colpo(t0 + t, 1100 + Math.random() * 1300, 1.2, .16 * (1 - t / dur) + .02, .025);
+}
+function accordo(fs, t0, dur, vol){
+  fs.forEach(f => {
+    const o = AC.createOscillator(), g = AC.createGain(), lp = AC.createBiquadFilter();
+    o.type = 'sawtooth'; o.frequency.value = f; lp.type = 'lowpass'; lp.frequency.value = 2200;
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(vol, t0 + .04); g.gain.setValueAtTime(vol, t0 + dur * .6); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(lp); lp.connect(g); g.connect(MASTER); o.start(t0); o.stop(t0 + dur + .05);
+  });
+}
+function suono(tipo, i = 0){
+  if (!audio()) return;
+  const suona = () => { try {
+    const t = AC.currentTime + .01;
+    if (tipo === 'scelta') {
+      const f = PENTA[i % PENTA.length];
+      nota(f, t, {vol: .5}); nota(f * 2, t + .1, {vol: .18, dur: .4});
+    } else if (tipo === 'slitta') sonagli(t, 3, .2);
+    else if (tipo === 'entra') {
+      [0, .08].forEach(d => { const o = AC.createOscillator(), g = AC.createGain(); o.type = 'sine';
+        o.frequency.setValueAtTime(260, t + d); o.frequency.exponentialRampToValueAtTime(620, t + d + .09); inviluppo(g, t + d, .1, .01, .14);
+        o.connect(g); g.connect(MASTER); o.start(t + d); o.stop(t + d + .2); });
+    } else if (tipo === 'via') {
+      sonagli(t, 6, .14); nota(392, t, {tipo: 'campana', vol: .2, dur: .8}); nota(523.25, t + .14, {tipo: 'campana', vol: .24, dur: 1.1});
+    } else if (tipo === 'tappa') {
+      [523.25, 659.26, 783.99, 1046.5, 1318.51, 1567.98].forEach((f, k) => nota(f, t + k * .08, {tipo: 'campana', vol: .2, dur: 1.2}));
+      sonagli(t + .1, 10, .12);
+    } else if (tipo === 'fine') {
+      [[392, 0], [523.25, .14], [659.26, .28]].forEach(([f, d]) => accordo([f], t + d, .16, .07));
+      accordo([523.25, 659.26, 783.99, 1046.5], t + .42, 1.4, .05);
+      [1046.5, 1318.51, 1567.98, 2093].forEach((f, k) => nota(f, t + .42 + k * .1, {tipo: 'campana', vol: .14, dur: 1.4}));
+      sonagli(t + .4, 14, .1); applauso(t + .5);
+    }
+  } catch(e) {} };
+  // l'audio si sveglia solo dopo un tocco e in modo asincrono: il suono parte appena è pronto
+  if (AC.state !== 'running') AC.resume().then(suona, () => {}); else suona();
+}
+// sveglia l'audio al primo tocco nel gioco (su iPhone serve un suono vero dentro il tocco)
+$('#gioco').addEventListener('pointerdown', () => {
+  if (!audio() || AC.state === 'running') return;
+  AC.resume(); try { const o = AC.createOscillator(), g = AC.createGain(); g.gain.value = 0.0001; o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime + .02); } catch(e) {}
+});
+
+// Effetti visivi (fermi con «riduci movimento»)
+const FERMO = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+function centro(el){ const r = el.getBoundingClientRect(); return {x: r.left + r.width / 2, y: r.top + r.height / 2}; }
+function particella(testo, x, y, size){
+  const p = document.createElement('span'); p.className = 'part'; p.textContent = testo;
+  p.style.left = x + 'px'; p.style.top = y + 'px'; p.style.fontSize = size + 'px';
+  $('#gioco-fx').appendChild(p); return p;
+}
+function esplosione(el){
+  if (FERMO()) return;
+  const {x, y} = centro(el), em = ['⭐', '✨', '❄️', '🌟', '✨', '⭐'];
+  const o = document.createElement('i'); o.className = 'onda'; o.style.left = x + 'px'; o.style.top = y + 'px';
+  $('#gioco-fx').appendChild(o); setTimeout(() => o.remove(), 750);
+  for (let k = 0; k < 16; k++) {
+    const p = particella(em[k % em.length], x, y, 20 + Math.random() * 26);
+    const ang = k / 16 * Math.PI * 2 + Math.random() * .3, r = 90 + Math.random() * 120, rot = (Math.random() - .5) * 300;
+    const dx = Math.cos(ang) * r, dy = Math.sin(ang) * r;
+    p.animate([
+      {transform: 'translate(0,0) scale(.2)', opacity: 1},
+      {transform: `translate(${dx}px,${dy}px) scale(1.15) rotate(${rot / 2}deg)`, opacity: 1, offset: .55},
+      {transform: `translate(${dx * 1.1}px,${dy + 90}px) scale(.7) rotate(${rot}deg)`, opacity: 0}
+    ], {duration: 950 + Math.random() * 350, easing: 'cubic-bezier(.2,.8,.3,1)'}).onfinish = () => p.remove();
+  }
+}
+// il regalo scelto vola sulla slitta
+function regaloVola(el){
+  const sl = $('#gioco-stelle .slitta');
+  if (FERMO() || !sl) return Promise.resolve();
+  const a = centro(el), b = centro(sl), dx = b.x - a.x, dy = b.y - a.y;
+  const g = particella('🎁', a.x, a.y, 58);
+  const an = g.animate([
+    {transform: 'translate(0,0) scale(.5) rotate(0deg)'},
+    {transform: `translate(${dx * .3}px,${dy * .3 - 90}px) scale(1.25) rotate(-18deg)`, offset: .4},
+    {transform: `translate(${dx}px,${dy}px) scale(.4) rotate(12deg)`}
+  ], {duration: 620, easing: 'cubic-bezier(.45,0,.55,1)'});
+  return new Promise(res => { an.onfinish = () => { g.remove(); res(); }; });
+}
+// ogni 10 scelte: Babbo Natale fa capolino dal basso e cade un po' di neve
+function tappa(){
+  if (FERMO()) return;
+  const fx = $('#gioco-fx'), b = document.createElement('span'); b.className = 'babbo'; b.textContent = '🎅';
+  b.style.left = (15 + Math.random() * 55) + '%'; fx.appendChild(b);
+  b.animate([
+    {transform: 'translateY(130%)'}, {transform: 'translateY(-8%) rotate(-10deg)', offset: .25},
+    {transform: 'translateY(0) rotate(10deg)', offset: .45}, {transform: 'translateY(-6%) rotate(-8deg)', offset: .65},
+    {transform: 'translateY(0) rotate(0)', offset: .8}, {transform: 'translateY(130%)'}
+  ], {duration: 2200, easing: 'ease-in-out'}).onfinish = () => b.remove();
+  for (let k = 0; k < 22; k++) {
+    const p = particella(k % 3 ? '❄️' : '⭐', Math.random() * innerWidth, -30, 16 + Math.random() * 22);
+    p.animate([{transform: 'translate(0,0) rotate(0)', opacity: 1}, {transform: `translate(${(Math.random() - .5) * 120}px,${innerHeight * (.6 + Math.random() * .5)}px) rotate(${Math.random() * 360}deg)`, opacity: 0}],
+      {duration: 1800 + Math.random() * 1200, delay: Math.random() * 500, easing: 'ease-in', fill: 'backwards'}).onfinish = () => p.remove();
   }
 }
 function coriandoli(){
@@ -1145,6 +1272,8 @@ async function mostraCoppia(){
     if (src) img.src = src; else img.removeAttribute('src');
     b.setAttribute('aria-label', GS.mappa.get(k ? c.d : c.s).titolo);
   });
+  const vs = $('#gioco-campo .vs'); vs.classList.remove('gira'); void vs.offsetWidth; vs.classList.add('gira');
+  if (GS.fatte) suono('entra');
   setTimeout(() => { if (GS) GS.pronto = true; }, 450);
 }
 function scegli(lato){
@@ -1155,10 +1284,16 @@ function scegli(lato){
   const log = J.get('gioco.log'); log.push(rec); J.set('gioco.log', log.slice(-3000));
   const q = J.get('gioco.coda'); q.push(rec); J.set('gioco.coda', q); sincronizzaPresto();
   GS.recenti.push([c.s, c.d]); GS.fatte++;
-  $$('#gioco-campo .scelta').forEach(b => b.classList.add(b.dataset.lato === lato ? 'vinto' : 'perso'));
-  stelline($(`#gioco-campo .scelta[data-lato="${lato}"]`));
-  suono('scelta'); try { navigator.vibrate && navigator.vibrate(25); } catch(e) {}
-  disegnaStelle();
+  const el = $(`#gioco-campo .scelta[data-lato="${lato}"]`), n = GS.fatte, tot = GS.lunghezza;
+  // via l'animazione d'entrata (con «fill: both» bloccava opacità e scala), poi vincitore e perdente
+  $$('#gioco-campo .scelta').forEach(b => { b.classList.remove('entra'); b.classList.add(b.dataset.lato === lato ? 'vinto' : 'perso'); });
+  esplosione(el);
+  suono('scelta', n - 1); try { navigator.vibrate && navigator.vibrate(25); } catch(e) {}
+  regaloVola(el).then(() => {
+    if (!GS) return;
+    disegnaStelle(); suono('slitta');
+    if (n % 10 === 0 && n < tot) { tappa(); suono('tappa'); }
+  });
   setTimeout(() => {
     if (!GS) return;
     if (GS.fatte >= GS.lunghezza) { schermo('fine'); coriandoli(); suono('fine'); sincronizza(); }
