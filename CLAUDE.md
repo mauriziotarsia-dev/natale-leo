@@ -7,6 +7,16 @@ Lista dei desideri di Natale della famiglia, da mandare ai parenti su WhatsApp. 
 - `index.html` è tutta l'app: stile e script dentro la pagina, niente build e niente dipendenze.
 - `foto/` contiene le foto dei regali del volantino, con un pezzo di hash nel nome: un file cambiato va salvato con un nome nuovo, così i telefoni non tengono la versione vecchia.
 - `og.jpg` è l'anteprima che WhatsApp mostra sotto il link; `icona.png` è l'icona per la Home.
+- `leo.html` è l'ingresso del gioco di Leo: aperta in Safari spiega come aggiungerla alla Home (icona `icona-leo.png`); aperta dalla Home va subito a `index.html#leo`.
+- `lib/zxing-0.23.0.min.js` (con `lib/zxing-LICENSE.txt`, Apache 2.0) legge i codici a barre dalle foto; si carica solo quando serve.
+
+## Funzioni
+
+- **Categorie** (`categoria` nel database, anche più di una separate da virgola): dinosauri, veicoli, playset, costruzioni, giochi, musica, creativita, peluche, vestiti, altro. Tabella `CATEGORIE` in `index.html`. Filtri nella lista dei parenti, nel gioco e nella classifica.
+- **Gioco «quale preferisci»** (area genitori, scheda «Gioco con Leo», oppure `#leo`): due regali per volta, Leo tocca quello che preferisce; partite da 12 scelte; ogni 6 scelte torna una coppia già vista a lati invertiti. Le scelte stanno nella tabella privata `natale.confronti` (funzioni `natale_g_confronti*`, con il codice dei genitori) e in una coda sul telefono se la rete manca. Classifica con Bradley-Terry pesato: una scelta vale la metà dopo 14 giorni (`EMIVITA_GIORNI`).
+- **Regali nuovi**: un regalo con meno di 3 confronti, quando il resto ne ha almeno 3, è «nuovo»; la figura 🆕 nel gioco lo mette contro regali già in classifica di forza simile, così bastano circa 4 scelte per piazzarlo.
+- **Aggiunta regali** dall'area genitori: da foto, da nota o da codice a barre (il numero diventa una ricerca Amazon, `link_stato` `ricerca`).
+- In modalità Leo la lista non si vede; senza codice salvato sul telefono si passa dal login dei genitori e poi si torna al gioco. Sulla Home di iPhone il salvataggio è separato da quello di Safari, quindi il codice va inserito anche lì.
 
 ## Dati
 

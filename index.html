@@ -10,6 +10,8 @@
 <meta property="og:image" content="https://mauriziotarsia-dev.github.io/natale-leo/og.jpg">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#1d5b43">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon" href="icona.png">
 <link rel="icon" href="icona.png">
 <style>
@@ -145,6 +147,49 @@ nav.barra button.on{color:var(--verde);font-weight:700}
 .tag.o{background:#fff3d6;color:#7a5200}
 .hidden{display:none!important}
 .foot{text-align:center;color:var(--grigio);font-size:12px;margin:22px 0}
+
+/* gioco con Leo */
+.gioco{position:fixed;inset:0;z-index:60;background:linear-gradient(160deg,#1d5b43 0%,#174a37 60%,#123a2b 100%);display:flex;flex-direction:column;
+  touch-action:manipulation;overscroll-behavior:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.gioco .top{display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 12px 4px}
+.gioco .esci{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:999px;width:40px;height:40px;font-size:18px;flex:0 0 auto}
+.gioco .stelle{flex:1;display:flex;gap:3px;justify-content:center;font-size:20px;flex-wrap:wrap}
+.gioco .stelle i{font-style:normal;opacity:.22;filter:grayscale(1);transition:opacity .3s,transform .3s}
+.gioco .stelle i.on{opacity:1;filter:none}
+.gioco .campo{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:8px 12px calc(16px + env(safe-area-inset-bottom));min-height:0}
+@media (orientation:portrait){.gioco .campo{grid-template-columns:1fr;grid-template-rows:1fr 1fr}}
+.gioco .scelta{background:#fff;border:0;border-radius:24px;padding:10px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+  box-shadow:0 8px 24px rgba(0,0,0,.28);transition:transform .25s,opacity .3s,box-shadow .25s;min-height:0}
+.gioco .scelta img{width:100%;height:100%;object-fit:contain;pointer-events:none;-webkit-user-drag:none}
+.gioco .scelta.vinto{transform:scale(1.05);box-shadow:0 0 0 7px var(--oro),0 12px 30px rgba(0,0,0,.35)}
+.gioco .scelta.perso{opacity:.18;transform:scale(.92)}
+.gioco .scelta.entra{animation:g-entra .35s ease-out both}
+.gioco .scelta.entra.d{animation-delay:.08s}
+@keyframes g-entra{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
+.gioco .st{position:absolute;font-size:34px;pointer-events:none;animation:g-st .9s ease-out forwards}
+@keyframes g-st{from{transform:translate(0,0) scale(.4);opacity:1}to{transform:translate(var(--x),var(--y)) scale(1.2);opacity:0}}
+.gioco .fine{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;color:#fff;text-align:center;padding:20px}
+.gioco .fine .grande{font-size:96px;line-height:1;animation:g-salta 1s ease-in-out infinite alternate}
+@keyframes g-salta{from{transform:translateY(0) rotate(-6deg)}to{transform:translateY(-14px) rotate(6deg)}}
+.gioco .fine .ancora{width:150px;height:150px;border-radius:50%;border:0;background:var(--oro);color:#3b2a05;font-size:64px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.gioco .fine .basta{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:999px;padding:10px 18px;font-size:15px}
+@media (prefers-reduced-motion:reduce){.gioco .scelta.entra,.gioco .fine .grande,.gioco .st{animation:none}}
+.gioco .inizio{flex:1;overflow:auto;padding:10px 14px calc(20px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+.gioco .cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;max-width:900px;margin:0 auto}
+.gioco .cat{background:#fff;border:0;border-radius:24px;padding:14px 8px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 8px 24px rgba(0,0,0,.25);color:var(--inchiostro)}
+.gioco .cat .em{font-size:64px;line-height:1}
+.gioco .cat .lb{font-size:13px;color:var(--grigio);font-weight:600}
+.gioco .cat:first-child{background:var(--oro)}
+.gioco .cat.nuovi{background:#fff3d6}
+.gioco .fine .ancora.casa{background:#fff;font-size:58px}
+.toolbar .wrap.cats-row{padding-top:0}
+.chip .n{font-size:11px;opacity:.7;margin-left:2px}
+.cat-scelta .check{margin:4px 10px 4px 0}
+.classifica .g-card{align-items:center}
+.classifica .pos{font-weight:800;font-size:16px;width:28px;text-align:right;flex:0 0 auto;color:var(--verde)}
+.barra-f{height:6px;border-radius:99px;background:#efe8dc;margin-top:5px;overflow:hidden}
+.barra-f span{display:block;height:100%;background:var(--verde)}
+.classifica input[type=checkbox]{width:22px;height:22px;flex:0 0 auto}
 </style>
 </head>
 <body>
@@ -171,6 +216,7 @@ nav.barra button.on{color:var(--verde);font-weight:700}
       <button class="chip" data-f="miei" aria-pressed="false" type="button">🎁 I miei</button>
       <button class="chip" data-f="prezzo" aria-pressed="false" type="button">€ Dal meno caro</button>
     </div>
+    <div class="wrap cats-row" id="cat-chips" role="group" aria-label="Tipo di regalo"></div>
   </div>
 
   <main class="wrap">
@@ -247,6 +293,7 @@ nav.barra button.on{color:var(--verde);font-weight:700}
         <button class="chip" data-t="riepilogo" aria-pressed="true" type="button">Riepilogo</button>
         <button class="chip" data-t="comprare" aria-pressed="false" type="button">Da comprare</button>
         <button class="chip" data-t="proposte" aria-pressed="false" type="button">Proposte <span id="g-n-prop"></span></button>
+        <button class="chip" data-t="gioco" aria-pressed="false" type="button">🎲 Gioco con Leo</button>
         <button class="chip" data-t="regali" aria-pressed="false" type="button">Regali</button>
         <button class="chip" data-t="altri" aria-pressed="false" type="button">Altri regali</button>
         <button class="chip" data-t="imp" aria-pressed="false" type="button">Impostazioni</button>
@@ -267,10 +314,28 @@ nav.barra button.on{color:var(--verde);font-weight:700}
         <p class="sub">Le vedete solo voi. Approvando, il regalo entra in lista (e, se richiesto, resta prenotato da chi l'ha proposto).</p>
         <div id="g-proposte"></div>
       </section>
+      <section class="box hidden" data-tab="gioco">
+        <h2>🎲 Quale preferisci?</h2>
+        <p class="sub">Leo vede due regali alla volta (uno a sinistra e uno a destra col telefono in orizzontale, uno sopra l'altro in verticale) e tocca quello che gli piace di più. Ogni partita sono 12 scelte; i regali tornano più volte contro avversari diversi e ogni tanto torna una coppia già vista, a lati invertiti, per vedere se cambia idea. Con 4–5 partite (anche in giorni diversi) la classifica diventa affidabile.</p>
+        <button class="btn primario full" id="g-gioca" type="button">▶ Gioca con Leo</button>
+        <p class="small" style="margin:10px 0 0">Leo può avere un'icona tutta sua sulla Home del telefono che apre direttamente il gioco: aprite il link qui sotto in Safari, poi Condividi → «Aggiungi alla schermata Home». La prima volta un genitore inserisce il codice. <button class="btn link" id="g-link-leo" type="button" style="padding:0">Copia il link per Leo</button></p>
+        <div id="g-gioco-stat" class="small" style="margin-top:12px"></div>
+        <h2 style="margin-top:18px">Classifica</h2>
+        <select class="i" id="g-cat-class" style="margin-bottom:8px"></select>
+        <p class="sub">Spuntate i regali da togliere dalla lista e premete «Nascondi». Si possono rimettere dalla scheda «Regali». Quelli già prenotati da un parente non si possono nascondere da qui.</p>
+        <div class="row" style="margin-bottom:6px">
+          <button class="btn chiaro mini" id="g-ultimi" type="button">Seleziona gli ultimi 10</button>
+          <button class="btn primario mini" id="g-nascondi" type="button" disabled>Nascondi i selezionati</button>
+        </div>
+        <div id="g-classifica" class="classifica"></div>
+        <button class="btn link" id="g-azzera" type="button" style="margin-top:10px">Ricomincia il gioco da zero</button>
+      </section>
       <section class="box hidden" data-tab="regali">
         <h2>Regali in lista</h2>
         <div class="row" style="margin-bottom:8px">
-          <button class="btn primario" id="g-nuovo" type="button">＋ Aggiungi regalo (anche da foto)</button>
+          <button class="btn primario mini" id="g-da-foto" type="button">📷 Aggiungi da foto</button>
+          <button class="btn verde mini" id="g-da-nota" type="button">📝 Da nota</button>
+          <button class="btn chiaro mini" id="g-da-codice" type="button">▥ Da codice a barre</button>
         </div>
         <div id="g-regali"></div>
       </section>
@@ -294,6 +359,23 @@ nav.barra button.on{color:var(--verde);font-weight:700}
       </section>
     </div>
   </main>
+</div>
+
+<div class="gioco hidden" id="gioco" aria-hidden="true">
+  <div class="top"><button class="esci" id="gioco-esci" type="button" aria-label="Indietro">✕</button><div class="stelle" id="gioco-stelle"></div><button class="esci" id="gioco-gen" type="button" aria-label="Area genitori">👤</button></div>
+  <div class="inizio" id="gioco-inizio"><div class="cats" id="gioco-cats"></div></div>
+  <div class="campo hidden" id="gioco-campo">
+    <button class="scelta" type="button" data-lato="s" aria-label="Regalo a sinistra"><img alt=""></button>
+    <button class="scelta" type="button" data-lato="d" aria-label="Regalo a destra"><img alt=""></button>
+  </div>
+  <div class="fine hidden" id="gioco-fine">
+    <div class="grande">🎉</div>
+    <div class="row" style="gap:22px;justify-content:center">
+      <button class="ancora" id="gioco-ancora" type="button" aria-label="Gioca ancora">▶</button>
+      <button class="ancora casa" id="gioco-casa" type="button" aria-label="Scegli altri giochi">🏠</button>
+    </div>
+    <button class="basta" id="gioco-fuori" type="button">Basta così</button>
+  </div>
 </div>
 
 <nav class="barra" id="barra">
@@ -320,6 +402,12 @@ const $ = (s, r=document) => r.querySelector(s);
 const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeUrl = u => (typeof u === 'string' && /^https:\/\//i.test(u)) ? u : '';
+const CATEGORIE = [
+  ['dinosauri','🦖','Dinosauri'], ['veicoli','🚗','Veicoli e piste'], ['playset','🏰','Case e mondi'],
+  ['costruzioni','🧱','Costruzioni'], ['giochi','🎲','Giochi da tavolo'], ['musica','🥁','Musica'],
+  ['creativita','🎨','Creatività e cucina'], ['peluche','🧸','Peluche'], ['vestiti','👟','Vestiti'], ['altro','🎁','Altro']];
+const catsOf = g => String((g && g.categoria) || '').split(',').map(x => x.trim()).filter(Boolean);
+const inCat = (g, c) => !c || (c === 'altro' ? (!catsOf(g).length || catsOf(g).includes('altro')) : catsOf(g).includes(c));
 const euro = c => (c === null || c === undefined || c === '') ? '' : (Number(c)/100).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
 
 function token(){
@@ -373,7 +461,7 @@ async function resizeImage(file, max=1000){
 }
 
 // ---------- stato ----------
-let DATA = null, filtro = 'tutti';
+let DATA = null, filtro = 'tutti', cat = '';
 let nome = LS.get('nome', '');
 
 function linkInfo(g){
@@ -384,10 +472,10 @@ function linkInfo(g){
   return {url:u, label:'Vedi su Amazon', hint:''};
 }
 function prezzoTxt(g){
-  if (g.prezzo_nota) return g.prezzo_nota;
   if (g.prezzo_cent !== null && g.prezzo_cent !== undefined) return euro(g.prezzo_cent);
-  return '';
+  return g.prezzo_nota || '';
 }
+const prezzoNota = g => (g.prezzo_cent !== null && g.prezzo_cent !== undefined) ? (g.prezzo_nota || '') : '';
 
 async function carica(silenzioso){
   try {
@@ -417,7 +505,9 @@ function render(){
   let lista = reg.slice();
   if (filtro === 'liberi') lista = lista.filter(g => !g.preso);
   if (filtro === 'miei') lista = lista.filter(g => g.mio);
+  if (cat) lista = lista.filter(g => inCat(g, cat));
   if (filtro === 'prezzo') lista.sort((a,b) => (a.prezzo_cent ?? 1e9) - (b.prezzo_cent ?? 1e9));
+  renderCat(reg);
   const grid = $('#grid'); grid.innerHTML = '';
   for (const g of lista) {
     const card = document.createElement('button');
@@ -435,6 +525,15 @@ function render(){
   }
   $('#grid-vuota').classList.toggle('hidden', lista.length > 0);
   renderMiei(); renderAltri(); renderProposte();
+}
+
+function renderCat(reg){
+  const box = $('#cat-chips');
+  const cs = CATEGORIE.filter(([k]) => reg.some(g => inCat(g, k)));
+  if (cat && !cs.some(([k]) => k === cat)) cat = '';
+  box.innerHTML = `<button class="chip" data-c="" aria-pressed="${!cat}" type="button">Tutti i tipi</button>` +
+    cs.map(([k, e, n]) => `<button class="chip" data-c="${k}" aria-pressed="${cat === k}" type="button">${e} ${esc(n)}<span class="n">${reg.filter(g => inCat(g, k)).length}</span></button>`).join('');
+  $$('.chip', box).forEach(b => b.onclick = () => { cat = b.dataset.c; render(); });
 }
 
 function renderMiei(){
@@ -525,7 +624,7 @@ function apriRegalo(id){
     <h3>${esc(g.titolo)}</h3>
     <div class="small">${esc([g.marca, g.codice && g.codice !== '—' ? 'cod. ' + g.codice : '', g.eta && g.eta !== '—' ? 'età ' + g.eta : ''].filter(Boolean).join(' · '))}</div>
     <p>${esc(g.descrizione)}</p>
-    <div class="amz"><div><div class="p ${pt ? '' : 'nd'}">${pt ? esc(pt) : 'Prezzo: vedi su Amazon'}</div>${li.hint ? `<div class="small">${esc(li.hint)}</div>` : ''}</div>
+    <div class="amz"><div><div class="p ${pt ? '' : 'nd'}">${pt ? esc(pt) : 'Prezzo: vedi su Amazon'}</div>${prezzoNota(g) ? `<div class="small">${esc(prezzoNota(g))}</div>` : ''}${li.hint ? `<div class="small">${esc(li.hint)}</div>` : ''}</div>
       ${li.url ? `<a class="btn chiaro mini" href="${esc(li.url)}" target="_blank" rel="noopener">${esc(li.label)} ↗</a>` : `<span class="small">${esc(li.label)}</span>`}</div>
     ${azioni}`, b => {
     fillImg($('.foto', b), g.foto);
@@ -554,8 +653,8 @@ function apriRegalo(id){
 }
 
 // ---------- filtri e barra ----------
-$$('#toolbar .chip').forEach(c => c.onclick = () => {
-  filtro = c.dataset.f; $$('#toolbar .chip').forEach(x => x.setAttribute('aria-pressed', x === c ? 'true' : 'false')); render();
+$$('#toolbar [data-f]').forEach(c => c.onclick = () => {
+  filtro = c.dataset.f; $$('#toolbar [data-f]').forEach(x => x.setAttribute('aria-pressed', x === c ? 'true' : 'false')); render();
 });
 $$('#barra button').forEach(b => b.onclick = () => {
   const t = b.dataset.go;
@@ -591,6 +690,7 @@ async function gCarica(){
     const r = await rpc('natale_genitori', {p_pin: PIN});
     if (!r.ok) { LS.del('pin'); PIN = ''; mostraLogin(r.errore === 'codice' ? 'Codice non valido (o troppi tentativi: riprova tra qualche minuto).' : ''); return; }
     G = r; $('#g-login').classList.add('hidden'); $('#g-main').classList.remove('hidden'); gRender();
+    if (LS.get('dopo', '') === 'leo') { LS.del('dopo'); location.hash = '#leo'; }
   } catch(e) { mostraLogin('Errore di connessione.'); }
 }
 function mostraLogin(msg){
@@ -599,7 +699,7 @@ function mostraLogin(msg){
 }
 $('#f-pin').onsubmit = e => { e.preventDefault(); PIN = $('#pin').value.trim(); LS.set('pin', PIN); gCarica(); };
 $('#g-esci').onclick = () => { LS.del('pin'); PIN = ''; G = null; mostraLogin(); };
-$$('.tabs .chip').forEach(c => c.onclick = () => { gTab = c.dataset.t; $$('.tabs .chip').forEach(x => x.setAttribute('aria-pressed', x === c ? 'true' : 'false')); gShowTab(); });
+$$('.tabs .chip').forEach(c => c.onclick = () => { gTab = c.dataset.t; $$('.tabs .chip').forEach(x => x.setAttribute('aria-pressed', x === c ? 'true' : 'false')); gShowTab(); if (gTab === 'gioco') { gGioco(); sincronizza().then(caricaConfronti).then(gGioco); } });
 function gShowTab(){ $$('#g-main [data-tab]').forEach(s => s.classList.toggle('hidden', s.dataset.tab !== gTab)); }
 
 async function gAct(fn, body, okMsg){
@@ -667,7 +767,7 @@ function gRender(){
     d.appendChild(gImg(g.foto));
     const info = document.createElement('div'); info.className = 'info';
     const p = g.prenotazione;
-    info.innerHTML = `<b>${esc(g.titolo)}</b><div class="small">${esc(prezzoTxt(g) || 'senza prezzo')}${g.visibile ? '' : ' · <span class="tag r">nascosto</span>'}
+    info.innerHTML = `<b>${esc(g.titolo)}</b><div class="small">${catsOf(g).map(k => (CATEGORIE.find(c => c[0] === k) || [,''])[1]).join('')} ${esc(prezzoTxt(g) || 'senza prezzo')}${prezzoNota(g) ? ' · ' + esc(prezzoNota(g)) : ''}${g.visibile ? '' : ' · <span class="tag r">nascosto</span>'}
       ${p ? '<br>Preso da <b>' + esc(p.nome) + '</b>' + (p.modo === 'genitori' ? ' (lo comprate voi)' : '') : ''}</div>`;
     const row = document.createElement('div'); row.className = 'row'; row.style.marginTop = '6px';
     const bt = (t, cls, fn) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn mini ' + cls; b.textContent = t; b.onclick = fn; row.appendChild(b); };
@@ -690,6 +790,7 @@ function gRender(){
     $('#i-titolo').value = imp.titolo || ''; $('#i-msg').value = imp.messaggio || ''; $('#i-rimb').value = imp.rimborso_info || '';
   }
   gShowTab();
+  if (gTab === 'gioco' && typeof gGioco === 'function') gGioco();
 }
 $('#f-imp').onsubmit = async e => {
   e.preventDefault();
@@ -698,10 +799,9 @@ $('#f-imp').onsubmit = async e => {
   const r = await gAct('natale_g_impostazioni', {p_dati:{titolo:$('#i-titolo').value, messaggio:$('#i-msg').value, rimborso_info:$('#i-rimb').value, nuovo_codice:nuovo}}, 'Impostazioni salvate');
   if (r && nuovo) { PIN = nuovo; LS.set('pin', nuovo); $('#i-pin').value = ''; }
 };
-$('#g-nuovo').onclick = () => editRegalo(null);
 
-function editRegalo(g){
-  const v = g || {titolo:'', marca:'', codice:'', eta:'', descrizione:'', amazon_url:'', prezzo_cent:null, prezzo_nota:'', segno_leo:false, visibile:true};
+function editRegalo(g, pre, modo){
+  const v = g || Object.assign({titolo:'', marca:'', codice:'', eta:'', descrizione:'', amazon_url:'', prezzo_cent:null, prezzo_nota:'', segno_leo:false, visibile:true, categoria:''}, pre || {});
   apriDialog(`<h3>${g ? 'Modifica regalo' : 'Nuovo regalo'}</h3>
     <form id="f-reg">
       <label class="f" for="r-foto">Foto ${g ? '(per cambiarla)' : '(es. la foto del gioco)'}</label>
@@ -712,7 +812,10 @@ function editRegalo(g){
       <div style="flex:1"><label class="f" for="r-eta">Età</label><input class="i" id="r-eta" maxlength="10" value="${esc(v.eta)}"></div></div>
       <label class="f" for="r-nota">Nota sul prezzo (facoltativa)</label><input class="i" id="r-nota" maxlength="60" value="${esc(v.prezzo_nota)}" placeholder="Es. da circa 30 €">
       <label class="f" for="r-marca">Marca</label><input class="i" id="r-marca" maxlength="60" value="${esc(v.marca)}">
-      <label class="f" for="r-desc">Descrizione</label><textarea class="i" id="r-desc" maxlength="300">${esc(v.descrizione)}</textarea>
+      <label class="f" for="r-desc">${modo === 'nota' ? 'Nota (cosa è, dove l\'avete visto…)' : 'Descrizione'}</label><textarea class="i" id="r-desc" maxlength="300">${esc(v.descrizione)}</textarea>
+      <label class="f" for="r-cod">Codice o codice a barre (facoltativo)</label><input class="i" id="r-cod" maxlength="40" value="${esc(v.codice === '—' ? '' : v.codice)}">
+      <label class="f">Tipo di regalo</label>
+      <div class="row cat-scelta">${CATEGORIE.map(([k, e, n]) => `<label class="check"><input type="checkbox" value="${k}" ${catsOf(v).includes(k) ? 'checked' : ''}> ${e} ${esc(n)}</label>`).join('')}</div>
       <label class="check"><input type="checkbox" id="r-vis" ${v.visibile ? 'checked' : ''}> Visibile ai parenti</label>
       <button class="btn verde full" type="submit">Salva</button>
       ${g && !g.prenotazione ? '<button class="btn link full" id="r-del" type="button">Elimina definitivamente</button>' : ''}
@@ -724,7 +827,9 @@ function editRegalo(g){
         const pr = $('#r-prezzo', b).value.trim().replace(/[€\s]/g, '').replace(',', '.');
         const dati = {titolo:$('#r-titolo', b).value.trim(), amazon_url:safeUrl($('#r-url', b).value.trim()), eta:$('#r-eta', b).value.trim(),
           prezzo_nota:$('#r-nota', b).value.trim(), marca:$('#r-marca', b).value.trim(), descrizione:$('#r-desc', b).value.trim(),
-          segno_leo:false, visibile:$('#r-vis', b).checked, prezzo_cent: pr && !isNaN(+pr) ? String(Math.round(+pr*100)) : ''};
+          segno_leo:false, visibile:$('#r-vis', b).checked, prezzo_cent: pr && !isNaN(+pr) ? String(Math.round(+pr*100)) : '',
+          codice:$('#r-cod', b).value.trim(), categoria:$$('.cat-scelta input:checked', b).map(x => x.value).join(',')};
+        if (/\/s\?k=/.test(dati.amazon_url)) dati.link_stato = 'ricerca';
         if (g) dati.id = g.id;
         const f = $('#r-foto', b).files[0]; if (f) dati.foto_dati = await resizeImage(f, 900);
         const r = await gAct('natale_g_regalo_salva', {p_dati:dati}, 'Regalo salvato');
@@ -732,13 +837,375 @@ function editRegalo(g){
       } catch(err) { toast('Errore nel salvataggio'); }
       btn.disabled = false; btn.textContent = 'Salva';
     };
+    if (modo === 'foto') { try { $('#r-foto', b).click(); } catch(e) {} }
+    else if (!g) setTimeout(() => $('#r-titolo', b).focus(), 60);
     const del = $('#r-del', b);
     if (del) del.onclick = async () => { if (!confirm('Eliminare definitivamente questo regalo?')) return; const r = await gAct('natale_g_regalo_elimina', {p_id:g.id}, 'Eliminato'); if (r) { dlg.close(); carica(true); } };
   });
 }
 
+// =================== GIOCO «QUALE PREFERISCI» ===================
+const ROUND = 12, EMIVITA_GIORNI = 14;
+const J = {
+  get(k){ try { return JSON.parse(LS.get(k, '[]')) || []; } catch(e){ return []; } },
+  set(k, v){ LS.set(k, JSON.stringify(v)); }
+};
+let SERVER = null;          // confronti salvati nel database (null = non raggiungibile)
+let GS = null;              // partita in corso
+let LEO = false;            // modalità Leo (#leo)
+const rnd = a => a[Math.floor(Math.random() * a.length)];
+const chiave = (x, y) => x < y ? x + '|' + y : y + '|' + x;
+const nuovoId = () => { const a = new Uint8Array(8); crypto.getRandomValues(a); return Array.from(a, b => b.toString(16).padStart(2,'0')).join(''); };
+
+function confronti(){
+  const m = new Map();
+  (SERVER || []).forEach(c => m.set(c.cid, c));
+  J.get('gioco.log').forEach(c => { if (!m.has(c.cid)) m.set(c.cid, c); });
+  return Array.from(m.values());
+}
+async function caricaConfronti(){
+  try { const r = await rpc('natale_g_confronti', {p_pin: PIN}); SERVER = r.ok ? r.confronti : null; }
+  catch(e) { SERVER = null; }
+}
+let syncT = null;
+async function sincronizza(){
+  const q = J.get('gioco.coda'); if (!q.length || !PIN) return;
+  const parte = q.slice(0, 200);
+  try {
+    const r = await rpc('natale_g_confronti_salva', {p_pin: PIN, p_lista: parte});
+    if (r.ok) { const fatti = new Set(parte.map(c => c.cid)); J.set('gioco.coda', J.get('gioco.coda').filter(c => !fatti.has(c.cid))); }
+  } catch(e) { /* riprova più tardi */ }
+}
+function sincronizzaPresto(){ clearTimeout(syncT); syncT = setTimeout(sincronizza, 1500); }
+
+// Bradley-Terry pesato: le scelte recenti contano di più (metà peso dopo EMIVITA_GIORNI).
+// Un avversario «medio» virtuale (1 vittoria e 1 sconfitta a testa) evita valori estremi con pochi dati.
+function forze(ids, log){
+  const idx = new Map(ids.map((id, i) => [id, i])), N = ids.length, ora = Date.now();
+  const w = new Array(N).fill(1), partite = [];
+  log.forEach(c => {
+    const i = idx.get(c.a), j = idx.get(c.b); if (i == null || j == null) return;
+    const peso = Math.pow(0.5, Math.max(0, ora - (c.t || ora)) / (EMIVITA_GIORNI * 864e5));
+    w[c.v === c.a ? i : j] += peso; partite.push([i, j, peso]);
+  });
+  let p = new Array(N).fill(1);
+  for (let it = 0; it < 150; it++) {
+    const den = p.map(x => 2 / (x + 1));
+    partite.forEach(([i, j, peso]) => { const d = peso / (p[i] + p[j]); den[i] += d; den[j] += d; });
+    p = p.map((_, i) => w[i] / den[i]);
+  }
+  const out = {}; ids.forEach((id, i) => out[id] = p[i]); return out;
+}
+function statistiche(ids, log){
+  const st = {}; ids.forEach(id => st[id] = {n: 0, v: 0});
+  log.forEach(c => { if (st[c.a]) { st[c.a].n++; if (c.v === c.a) st[c.a].v++; } if (st[c.b]) { st[c.b].n++; if (c.v === c.b) st[c.b].v++; } });
+  return st;
+}
+// regali «nuovi»: meno di 3 confronti, quando il resto della classifica è già fatto
+function nuovi(items){
+  const ids = items.map(g => g.id), st = statistiche(ids, confronti());
+  const ns = ids.map(id => st[id].n).sort((x, y) => x - y), med = ns[Math.floor(ns.length / 2)] || 0;
+  return med >= 3 ? items.filter(g => st[g.id].n < 3) : [];
+}
+function visibili(){ return (G && G.regali || []).filter(g => g.visibile); }
+
+function prossimaCoppia(){
+  const ids = GS.items.map(g => g.id), log = confronti(), st = statistiche(ids, log);
+  const recenti = GS.recenti.slice(-2).flat();
+  // ogni 6 scelte, se possibile, ripropone una coppia già vista a lati invertiti
+  if (!GS.focus && GS.fatte > 0 && GS.fatte % 6 === 5) {
+    const vecchie = log.filter(c => ids.includes(c.a) && ids.includes(c.b) && !recenti.includes(c.a) && !recenti.includes(c.b) && !c.sessione.endsWith('-r'));
+    if (vecchie.length) {
+      const c = rnd(vecchie);
+      const prima = c.lato === 's' ? c.v : c.lato === 'd' ? (c.v === c.a ? c.b : c.a) : c.a;
+      return {s: prima === c.a ? c.b : c.a, d: prima, rip: true};
+    }
+  }
+  const coppie = new Set(log.map(c => chiave(c.a, c.b)));
+  let cand = ids.filter(id => !recenti.includes(id)); if (cand.length < 2) cand = ids.slice();
+  let candA = cand;
+  if (GS.focus) { const fc = cand.filter(id => GS.focus.has(id)); candA = fc.length ? fc : ids.filter(id => GS.focus.has(id)); }
+  const minN = Math.min(...candA.map(id => st[id].n));
+  const a = rnd(candA.filter(id => st[id].n === minN));
+  let pool = cand.filter(id => id !== a && !coppie.has(chiave(a, id)));
+  if (!pool.length) pool = ids.filter(id => id !== a);
+  const consolidati = pool.filter(id => st[id].n >= 3 && !(GS.focus && GS.focus.has(id)));
+  let b;
+  if (st[a].n < 3 && consolidati.length >= 3) {
+    // piazzamento di un regalo nuovo: contro un regalo già in classifica di forza simile (sale o scende a ogni scelta)
+    const f = forze(ids, log);
+    consolidati.sort((x, y) => Math.abs(Math.log(f[x] / f[a])) - Math.abs(Math.log(f[y] / f[a])));
+    b = rnd(consolidati.slice(0, 2));
+  } else if (log.length < ids.length * 1.5 || Math.random() < 0.25) {
+    const m = Math.min(...pool.map(id => st[id].n)); b = rnd(pool.filter(id => st[id].n <= m + 1));
+  } else {
+    const f = forze(ids, log);
+    pool.sort((x, y) => Math.abs(Math.log(f[x] / f[a])) - Math.abs(Math.log(f[y] / f[a])));
+    b = rnd(pool.slice(0, 4));
+  }
+  return Math.random() < 0.5 ? {s: a, d: b} : {s: b, d: a};
+}
+
+let AC = null;
+function suono(tipo){
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if (AC.state === 'suspended') AC.resume();
+    const t = AC.currentTime, note = tipo === 'fine' ? [523, 659, 784, 1047, 1319] : tipo === 'via' ? [392, 523] : [784, 1047];
+    note.forEach((f, i) => {
+      const o = AC.createOscillator(), g = AC.createGain(), t0 = t + i * 0.09;
+      o.type = 'triangle'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.22, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.28);
+      o.connect(g); g.connect(AC.destination); o.start(t0); o.stop(t0 + 0.3);
+    });
+  } catch(e) {}
+}
+function stelline(el){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (let i = 0; i < 7; i++) {
+    const s = document.createElement('span'); s.className = 'st'; s.textContent = i % 2 ? '⭐' : '✨';
+    const ang = Math.random() * Math.PI * 2, r = 60 + Math.random() * 70;
+    s.style.setProperty('--x', Math.cos(ang) * r + 'px'); s.style.setProperty('--y', Math.sin(ang) * r + 'px');
+    el.appendChild(s); setTimeout(() => s.remove(), 950);
+  }
+}
+async function precarica(id){
+  const g = GS.mappa.get(id); const src = await fotoSrc(g.foto);
+  if (src) await new Promise(res => { const i = new Image(); i.onload = i.onerror = res; i.src = src; });
+  return src;
+}
+function schermo(nome){
+  $('#gioco-inizio').classList.toggle('hidden', nome !== 'inizio');
+  $('#gioco-campo').classList.toggle('hidden', nome !== 'campo');
+  $('#gioco-fine').classList.toggle('hidden', nome !== 'fine');
+  $('#gioco-stelle').classList.toggle('hidden', nome === 'inizio');
+  $('#gioco-gen').classList.toggle('hidden', !(LEO && nome === 'inizio'));
+  $('#gioco-esci').classList.toggle('hidden', LEO && nome === 'inizio');
+  $('#gioco-fuori').classList.toggle('hidden', LEO);
+}
+function disegnaStelle(){
+  $('#gioco-stelle').innerHTML = Array.from({length: GS.lunghezza}, (_, i) => `<i class="${i < GS.fatte ? 'on' : ''}">⭐</i>`).join('');
+}
+async function mostraCoppia(){
+  GS.pronto = false;
+  const c = prossimaCoppia(); GS.coppia = c;
+  const [srcS, srcD] = await Promise.all([precarica(c.s), precarica(c.d)]);
+  $$('#gioco-campo .scelta').forEach((b, k) => {
+    b.className = 'scelta entra' + (k ? ' d' : '');
+    const img = $('img', b), src = k ? srcD : srcS;
+    if (src) img.src = src; else img.removeAttribute('src');
+    b.setAttribute('aria-label', GS.mappa.get(k ? c.d : c.s).titolo);
+  });
+  setTimeout(() => { if (GS) GS.pronto = true; }, 450);
+}
+function scegli(lato){
+  if (!GS || !GS.pronto) return;
+  GS.pronto = false;
+  const c = GS.coppia, v = lato === 's' ? c.s : c.d;
+  const rec = {cid: nuovoId(), a: c.s, b: c.d, v, lato, sessione: GS.id + (c.rip ? '-r' : ''), t: Date.now()};
+  const log = J.get('gioco.log'); log.push(rec); J.set('gioco.log', log.slice(-3000));
+  const q = J.get('gioco.coda'); q.push(rec); J.set('gioco.coda', q); sincronizzaPresto();
+  GS.recenti.push([c.s, c.d]); GS.fatte++;
+  $$('#gioco-campo .scelta').forEach(b => b.classList.add(b.dataset.lato === lato ? 'vinto' : 'perso'));
+  stelline($(`#gioco-campo .scelta[data-lato="${lato}"]`));
+  suono('scelta'); try { navigator.vibrate && navigator.vibrate(25); } catch(e) {}
+  disegnaStelle();
+  setTimeout(() => {
+    if (!GS) return;
+    if (GS.fatte >= GS.lunghezza) { schermo('fine'); suono('fine'); sincronizza(); }
+    else mostraCoppia();
+  }, 900);
+}
+// scelta del tipo di regali (anche per Leo: si sceglie con le figure)
+function categorieGioco(){
+  const vis = visibili();
+  const out = [{k: '', e: '🎁', n: 'Tutti', items: vis}];
+  CATEGORIE.forEach(([k, e, n]) => { const it = vis.filter(g => inCat(g, k)); if (it.length >= 3) out.push({k, e, n, items: it}); });
+  const nv = nuovi(vis); if (nv.length) out.push({k: '#nuovi', e: '🆕', n: 'Regali nuovi', items: vis, focus: nv});
+  return out;
+}
+function mostraInizio(){
+  GS = null; schermo('inizio');
+  const box = $('#gioco-cats'); box.innerHTML = '';
+  categorieGioco().forEach(c => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'cat' + (c.focus ? ' nuovi' : '');
+    b.innerHTML = `<span class="em">${c.e}</span><span class="lb">${esc(c.n)}${c.focus ? ' (' + c.focus.length + ')' : ''}</span>`;
+    b.onclick = () => partita(c);
+    box.appendChild(b);
+  });
+}
+function partita(c){
+  suono('via');
+  const items = c.items;
+  if (items.length < 2) { toast('Servono almeno due regali'); return; }
+  const focus = c.focus ? new Set(c.focus.map(g => g.id)) : null;
+  const coppiePossibili = items.length * (items.length - 1) / 2;
+  const lunghezza = focus ? Math.min(ROUND, focus.size * 4) : Math.min(ROUND, Math.max(4, coppiePossibili));
+  GS = {cat: c, items, mappa: new Map(items.map(g => [g.id, g])), focus, lunghezza, id: nuovoId(), fatte: 0, recenti: [], pronto: false};
+  schermo('campo'); disegnaStelle(); mostraCoppia();
+}
+async function apriGioco(){
+  if (!G) { toast('Lista non ancora caricata'); return; }
+  if (visibili().length < 2) { toast('Servono almeno due regali visibili'); return; }
+  await caricaConfronti();
+  const el = $('#gioco'); el.classList.remove('hidden'); el.setAttribute('aria-hidden', 'false');
+  document.documentElement.style.overflow = 'hidden';
+  mostraInizio();
+}
+function chiudiGioco(){
+  GS = null; const el = $('#gioco'); el.classList.add('hidden'); el.setAttribute('aria-hidden', 'true');
+  document.documentElement.style.overflow = '';
+  sincronizza().then(caricaConfronti).then(gGioco);
+}
+$$('#gioco-campo .scelta').forEach(b => b.addEventListener('click', () => scegli(b.dataset.lato)));
+$('#gioco-esci').onclick = () => {
+  if (GS) { if (GS.fatte === 0 || confirm('Interrompere la partita? Le scelte fatte restano salvate.')) { sincronizza(); mostraInizio(); } }
+  else if (!LEO) chiudiGioco();
+};
+$('#gioco-gen').onclick = () => { if (confirm('Passare all\'area genitori?')) { LEO = false; chiudiGioco(); location.hash = '#genitori'; } };
+$('#gioco-ancora').onclick = () => partita(GS.cat);
+$('#gioco-casa').onclick = () => mostraInizio();
+$('#gioco-fuori').onclick = chiudiGioco;
+$('#gioco').addEventListener('touchmove', e => e.preventDefault(), {passive: false});
+$('#g-gioca').onclick = () => { suono('via'); apriGioco(); };
+$('#g-link-leo').onclick = async () => {
+  const u = location.href.split('#')[0].replace(/index\.html$/, '') + 'leo.html';
+  try { await navigator.clipboard.writeText(u); toast('Link copiato'); } catch(e) { prompt('Link per il gioco di Leo:', u); }
+};
+
+// ---------- classifica ----------
+function gGioco(){
+  if (!G) return;
+  const tutti = visibili(), ids = tutti.map(g => g.id);
+  const log = confronti().filter(c => ids.includes(c.a) && ids.includes(c.b));
+  const st = statistiche(ids, log), f = forze(ids, log);
+  const pend = J.get('gioco.coda').length;
+  const sx = log.filter(c => c.lato === 's').length, conLato = log.filter(c => c.lato).length;
+  const per = new Map(); log.forEach(c => { const k = chiave(c.a, c.b); if (!per.has(k)) per.set(k, []); per.get(k).push(c.v); });
+  let rip = 0, ug = 0; per.forEach(vs => { if (vs.length > 1) { rip += vs.length - 1; vs.slice(1).forEach(v => { if (v === vs[0]) ug++; }); } });
+  const medi = ids.length ? (log.length * 2 / ids.length) : 0, nv = nuovi(tutti);
+  const righe = [`<b>${log.length}</b> scelte fatte · in media ${medi.toFixed(1).replace('.', ',')} per regalo${medi < 4 ? ' (meglio arrivare almeno a 4)' : ''}`];
+  if (nv.length) righe.push(`🆕 ${nv.length} regali nuovi da piazzare: nel gioco toccate la figura 🆕 (bastano ${Math.min(ROUND, nv.length * 4)} scelte)`);
+  if (conLato >= 10) { const pc = Math.round(sx * 100 / conLato); righe.push(`Ha scelto il regalo a sinistra (o in alto) il ${pc}% delle volte${pc >= 75 || pc <= 25 ? ' — tende a toccare sempre lo stesso lato: prendete la classifica con le pinze' : ''}`); }
+  if (rip >= 3) righe.push(`Coppie riproposte: ha confermato la scelta ${ug} volte su ${rip}`);
+  righe.push('Le scelte recenti contano di più: dopo due settimane una scelta vale la metà.');
+  if (SERVER === null) righe.push('⚠️ Le scelte sono salvate solo su questo telefono (il database non risponde).');
+  else if (pend) righe.push(`${pend} scelte da inviare al database`);
+  $('#g-gioco-stat').innerHTML = righe.join('<br>');
+
+  const sel = $('#g-cat-class'), catSel = sel.value;
+  sel.innerHTML = `<option value="">Tutte le categorie</option>` + CATEGORIE.filter(([k]) => tutti.some(g => inCat(g, k))).map(([k, e, n]) => `<option value="${k}" ${k === catSel ? 'selected' : ''}>${e} ${esc(n)}</option>`).join('');
+  const items = tutti.filter(g => inCat(g, sel.value));
+  const ordTutti = tutti.slice().sort((x, y) => (f[y.id] - f[x.id]) || (st[y.id].n - st[x.id].n));
+  const pos = new Map(ordTutti.map((g, i) => [g.id, i + 1]));
+  const ord = ordTutti.filter(g => items.includes(g));
+  const box = $('#g-classifica'); box.innerHTML = log.length ? '' : '<p class="small">Ancora nessuna scelta: premete «Gioca con Leo».</p>';
+  if (!log.length) { aggiornaNascondi(); return; }
+  ord.forEach(g => {
+    const s = st[g.id], pct = Math.round(f[g.id] / (f[g.id] + 1) * 100);
+    const d = document.createElement('label'); d.className = 'g-card';
+    d.innerHTML = `<span class="pos">${pos.get(g.id)}</span>`;
+    d.appendChild(gImg(g.foto));
+    const info = document.createElement('div'); info.className = 'info';
+    info.innerHTML = `<b>${esc(g.titolo)}</b><div class="small">scelto ${s.v} volte su ${s.n}${s.n < 3 ? ' <span class="tag o">' + (nv.includes(g) ? 'nuovo' : 'pochi confronti') + '</span>' : ''}${g.prenotazione ? ' <span class="tag v">già preso</span>' : ''}</div><div class="barra-f"><span style="width:${pct}%"></span></div>`;
+    d.appendChild(info);
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.dataset.id = g.id; cb.disabled = !!g.prenotazione;
+    cb.onchange = aggiornaNascondi; d.appendChild(cb);
+    box.appendChild(d);
+  });
+  aggiornaNascondi();
+}
+function aggiornaNascondi(){ const n = $$('#g-classifica input:checked').length; const b = $('#g-nascondi'); b.disabled = !n; b.textContent = n ? `Nascondi i selezionati (${n})` : 'Nascondi i selezionati'; }
+$('#g-cat-class').onchange = gGioco;
+$('#g-ultimi').onclick = () => { const cbs = $$('#g-classifica input[type=checkbox]:not(:disabled)'); cbs.forEach(c => c.checked = false); cbs.slice(-10).forEach(c => c.checked = true); aggiornaNascondi(); };
+$('#g-nascondi').onclick = async () => {
+  const ids = $$('#g-classifica input:checked').map(c => c.dataset.id);
+  if (!ids.length || !confirm(`Nascondere ${ids.length} regali dalla lista dei parenti? Potete rimetterli dalla scheda «Regali».`)) return;
+  const b = $('#g-nascondi'); b.disabled = true; b.textContent = 'Un momento…';
+  let ok = 0;
+  for (const id of ids) { try { const r = await rpc('natale_g_regalo_salva', {p_pin: PIN, p_dati: {id, visibile: false}}); if (r.ok) ok++; } catch(e) {} }
+  toast(`${ok} regali nascosti`); await gCarica(); carica(true);
+};
+$('#g-azzera').onclick = async () => {
+  if (!confirm('Cancellare tutte le scelte fatte da Leo e ricominciare il gioco da zero?')) return;
+  try { const r = await rpc('natale_g_confronti_azzera', {p_pin: PIN}); if (!r.ok) throw 0; } catch(e) { if (SERVER !== null) { toast('Non riuscito, riprova'); return; } }
+  J.set('gioco.log', []); J.set('gioco.coda', []); SERVER = SERVER === null ? null : [];
+  toast('Gioco azzerato'); gGioco();
+};
+window.addEventListener('online', sincronizza);
+
+// ---------- codice a barre ----------
+let zxingP = null;
+function caricaZxing(){
+  if (window.ZXing) return Promise.resolve();
+  return zxingP = zxingP || new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'lib/zxing-0.23.0.min.js'; s.onload = res; s.onerror = () => { zxingP = null; rej(new Error('zxing')); }; document.head.appendChild(s); });
+}
+async function leggiCodice(file){
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+    if ('BarcodeDetector' in window) {
+      try { const r = await new window.BarcodeDetector({formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128']}).detect(img); if (r && r[0]) return r[0].rawValue; } catch(e) {}
+    }
+    await caricaZxing();
+    const Z = window.ZXing, hints = new Map();
+    hints.set(Z.DecodeHintType.POSSIBLE_FORMATS, [Z.BarcodeFormat.EAN_13, Z.BarcodeFormat.EAN_8, Z.BarcodeFormat.UPC_A, Z.BarcodeFormat.UPC_E, Z.BarcodeFormat.CODE_128]);
+    hints.set(Z.DecodeHintType.TRY_HARDER, true);
+    const reader = new Z.MultiFormatReader(); reader.setHints(hints);
+    for (const max of [1000, 1600, 700]) for (const rot of [0, 90]) {
+      const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      const w = Math.round(img.naturalWidth * s), h = Math.round(img.naturalHeight * s);
+      const c = document.createElement('canvas'); c.width = rot ? h : w; c.height = rot ? w : h;
+      const ctx = c.getContext('2d');
+      if (rot) { ctx.translate(h, 0); ctx.rotate(Math.PI / 2); }
+      ctx.drawImage(img, 0, 0, w, h);
+      try { return reader.decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.HTMLCanvasElementLuminanceSource(c))), hints).getText(); } catch(e) {}
+    }
+    return '';
+  } finally { URL.revokeObjectURL(url); }
+}
+function daCodice(){
+  apriDialog(`<h3>Aggiungi da codice a barre</h3>
+    <p class="small">Fotografate il codice a barre sulla scatola: il numero diventa una ricerca su Amazon. Poi aggiungete il nome e, se volete, una foto del gioco.</p>
+    <label class="btn verde full" style="margin-top:6px">📷 Fotografa il codice a barre<input id="bc-foto" type="file" accept="image/*" capture="environment" style="display:none"></label>
+    <div id="bc-stato" class="avviso hidden"></div>
+    <label class="f" for="bc-num">Oppure scrivete il numero sotto le barre</label>
+    <input class="i" id="bc-num" inputmode="numeric" maxlength="20" placeholder="Es. 8001234567890">
+    <button class="btn primario full" id="bc-ok" type="button" style="margin-top:12px">Continua</button>`, b => {
+    const st = $('#bc-stato', b), num = $('#bc-num', b);
+    $('#bc-foto', b).onchange = async e => {
+      const f = e.target.files[0]; if (!f) return;
+      st.className = 'avviso'; st.textContent = 'Leggo il codice…';
+      try {
+        const t = await leggiCodice(f);
+        if (t) { num.value = t; st.className = 'avviso ok'; st.textContent = 'Codice letto: ' + t; }
+        else { st.className = 'avviso err'; st.textContent = 'Non riesco a leggerlo: riprovate più da vicino e con più luce, oppure scrivete il numero.'; }
+      } catch(err) { st.className = 'avviso err'; st.textContent = 'Lettura non riuscita: scrivete il numero.'; }
+    };
+    $('#bc-ok', b).onclick = () => {
+      const c = num.value.replace(/\D/g, '');
+      if (c.length < 6) { toast('Serve il numero del codice a barre'); return; }
+      dlg.close();
+      editRegalo(null, {codice: c, amazon_url: 'https://www.amazon.it/s?k=' + c, descrizione: '', titolo: ''});
+    };
+  });
+}
+$('#g-da-foto').onclick = () => editRegalo(null, null, 'foto');
+$('#g-da-nota').onclick = () => editRegalo(null, null, 'nota');
+$('#g-da-codice').onclick = daCodice;
+
 // ---------- router ----------
+async function apriLeo(){
+  LEO = true;
+  $('#app-lista').classList.add('hidden'); $('#app-gen').classList.add('hidden'); $('#barra').classList.add('hidden');
+  if (!PIN) { LS.set('dopo', 'leo'); LEO = false; location.hash = '#genitori'; toast('Un genitore deve inserire il codice una volta su questo telefono'); return; }
+  try { const r = await rpc('natale_genitori', {p_pin: PIN}); if (!r.ok) throw 0; G = r; }
+  catch(e) { if (!G) { LS.set('dopo', 'leo'); LEO = false; location.hash = '#genitori'; return; } }
+  apriGioco();
+}
 function route(){
+  if (location.hash === '#leo') { apriLeo(); return; }
+  if (LEO) { LEO = false; GS = null; $('#gioco').classList.add('hidden'); document.documentElement.style.overflow = ''; }
   const gen = location.hash === '#genitori';
   $('#app-lista').classList.toggle('hidden', gen); $('#app-gen').classList.toggle('hidden', !gen); $('#barra').classList.toggle('hidden', gen);
   document.body.style.paddingBottom = gen ? '20px' : '';
@@ -746,10 +1213,10 @@ function route(){
   window.scrollTo(0, 0);
 }
 window.addEventListener('hashchange', route);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (location.hash === '#genitori') { if (PIN) gCarica(); } else carica(true); } });
-setInterval(() => { if (!document.hidden && location.hash !== '#genitori') carica(true); }, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (location.hash === '#leo') { sincronizza(); } else if (location.hash === '#genitori') { if (PIN && !GS) gCarica(); } else carica(true); } });
+setInterval(() => { if (!document.hidden && location.hash !== '#genitori' && location.hash !== '#leo') carica(true); }, 30000);
 route();
-if (!nome && location.hash !== '#genitori') setTimeout(() => { if (!nome && !dlg.open) chiediNome(); }, 900);
+if (!nome && location.hash !== '#genitori' && location.hash !== '#leo') setTimeout(() => { if (!nome && !dlg.open && location.hash !== '#leo') chiediNome(); }, 900);
 })();
 </script>
 </body>
