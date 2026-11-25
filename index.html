@@ -993,10 +993,17 @@ function confronti(){
   return Array.from(m.values());
 }
 async function caricaConfronti(){
+  const inCoda = new Set(J.get('gioco.coda').map(c => c.cid));
   try {
     if (LEO) { const r = await rpc('natale_leo_dati', {p_pw: leoPw()}); if (r.ok) { LEODATA = r.regali; SERVER = r.confronti; } else SERVER = null; }
     else { const r = await rpc('natale_g_confronti', {p_pin: PIN}); SERVER = r.ok ? r.confronti : null; }
   } catch(e) { SERVER = null; }
+  // una scelta già inviata che sul server non c'è più è stata cancellata («Ricomincia il gioco da zero»):
+  // la tolgo anche da questo telefono, altrimenti qui il gioco non ripartirebbe da capo
+  if (SERVER) {
+    const sul = new Set(SERVER.map(c => c.cid)); J.get('gioco.coda').forEach(c => inCoda.add(c.cid));
+    J.set('gioco.log', J.get('gioco.log').filter(c => sul.has(c.cid) || inCoda.has(c.cid)));
+  }
 }
 let syncT = null;
 async function sincronizza(){
