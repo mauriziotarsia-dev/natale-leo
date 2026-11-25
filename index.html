@@ -100,6 +100,8 @@ h1{margin:2px 0 8px;font-size:clamp(28px,7.4vw,42px);line-height:1.08;font-weigh
 .badges{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;gap:6px;pointer-events:none}
 .b{font-family:var(--f-titolo);font-size:12px;font-weight:500;border-radius:999px;padding:3px 9px;background:var(--neve);color:var(--notte)}
 .b.eta{margin-left:auto}
+.b.leo{background:var(--oro);color:#5b3b00;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+.ordine-leo{margin:4px 2px 12px;font-size:14px;color:var(--grigio)}
 .card .body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px;flex:1;border-top:1px solid #eef1f8}
 .card .t{font-family:var(--f-titolo);font-weight:600;font-size:15.5px;line-height:1.22;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card .meta{font-size:12.5px;color:var(--grigio)}
@@ -245,25 +247,27 @@ nav.barra button.leo{color:var(--abete-2)}
 .gioco .scelta.entra.d{animation-delay:.08s}
 @keyframes g-entra{from{transform:scale(.7) translateY(20px);opacity:0}to{transform:none;opacity:1}}
 .gioco .inizio{flex:1;overflow:auto;padding:12px 16px calc(24px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
-.gioco .cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:16px;max-width:900px;margin:0 auto}
-.gioco .cat{--c:#2D8CEB;background:#fff;border:0;border-radius:28px;padding:16px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--inchiostro);
-  box-shadow:0 8px 0 color-mix(in srgb,var(--c) 70%,#000),0 16px 28px rgba(0,0,0,.25);transition:transform .12s}
-.gioco .cat:active{transform:translateY(5px);box-shadow:0 3px 0 color-mix(in srgb,var(--c) 70%,#000)}
-.gioco .cat .em{font-size:58px;line-height:1;width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--c) 18%,#fff)}
-.gioco .cat .lb{font-family:var(--f-titolo);font-size:14px;color:var(--grigio);font-weight:500}
-.gioco .fine{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;color:#fff;text-align:center;padding:20px}
-.gioco .fine .grande{font-size:110px;line-height:1;animation:g-salta 1s ease-in-out infinite alternate}
+.gioco .intro{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;color:#fff;max-width:440px;margin:0 auto}
+.gioco .intro .regalone{font-size:96px;line-height:1;animation:g-salta 1.1s ease-in-out infinite alternate}
+.gioco .intro h2,.gioco .fine h2{font-family:var(--f-titolo);font-weight:600;font-size:28px;line-height:1.15;margin:0;color:#fff}
+.gioco .intro p,.gioco .fine p{margin:0;font-size:15px;line-height:1.45;color:rgba(255,255,255,.82);max-width:380px}
+.gioco .intro .via{margin-top:10px;animation:g-pulsa 1.4s ease-in-out infinite}
+@keyframes g-pulsa{50%{transform:scale(1.07)}}
+.gioco .lbl{font-family:var(--f-titolo);font-weight:500;font-size:17px;color:#fff}
+.gioco .fine .bottoni{display:flex;gap:28px;justify-content:center;margin-top:6px}
+.gioco .fine .col{display:flex;flex-direction:column;align-items:center;gap:10px}
+.gioco .fine{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;text-align:center;padding:20px}
+.gioco .fine .grande{font-size:96px;line-height:1;animation:g-salta 1s ease-in-out infinite alternate}
 @keyframes g-salta{from{transform:translateY(0) rotate(-8deg)}to{transform:translateY(-16px) rotate(8deg)}}
-.gioco .fine .ancora{width:150px;height:150px;border-radius:50%;border:0;background:var(--oro);color:#5b3b00;font-size:64px;box-shadow:0 10px 0 var(--oro-2),0 20px 40px rgba(0,0,0,.35)}
-.gioco .fine .ancora:active{transform:translateY(6px);box-shadow:0 4px 0 var(--oro-2)}
-.gioco .fine .ancora.casa{background:#fff;font-size:58px;box-shadow:0 10px 0 #c9d0e6,0 20px 40px rgba(0,0,0,.35)}
-.gioco .fine .basta{background:rgba(255,255,255,.14);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:15px;font-family:var(--f-titolo)}
+.gioco .fine .ancora,.gioco .intro .ancora{width:130px;height:130px;border-radius:50%;border:0;background:var(--oro);color:#5b3b00;font-size:64px;box-shadow:0 10px 0 var(--oro-2),0 20px 40px rgba(0,0,0,.35)}
+.gioco .ancora:active{transform:translateY(6px);box-shadow:0 4px 0 var(--oro-2)}
+.gioco .fine .ancora.casa{background:#fff;color:#1d8a5a;font-size:58px;box-shadow:0 10px 0 #c9d0e6,0 20px 40px rgba(0,0,0,.35)}
 .coriandoli{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .coriandoli i{position:absolute;top:-20px;width:10px;height:16px;border-radius:3px;animation:cade 2.6s linear forwards}
 @keyframes cade{to{transform:translateY(110vh) rotate(720deg)}}
 .fiocco{animation:none}
 .gioco .stelle{min-width:0}
-@media (prefers-reduced-motion:reduce){.gioco .stelle .slitta.hop,.luci,.gioco::before,.snow,.gioco .scelta.entra,.gioco .scelta.vinto,.gioco .vs.gira,.fx .onda,.gioco .fine .grande,.coriandoli,.gioco .stelle i.on,dialog[open]{animation:none}}
+@media (prefers-reduced-motion:reduce){.gioco .stelle .slitta.hop,.luci,.gioco::before,.snow,.gioco .scelta.entra,.gioco .scelta.vinto,.gioco .vs.gira,.fx .onda,.gioco .fine .grande,.gioco .intro .regalone,.gioco .intro .via,.coriandoli,.gioco .stelle i.on,dialog[open]{animation:none}}
 </style>
 </head>
 <body>
@@ -299,6 +303,7 @@ nav.barra button.leo{color:var(--abete-2)}
 
   <main class="wrap">
     <div id="err" class="avviso err hidden"></div>
+    <p class="ordine-leo hidden" id="ordine-leo">🦖 In ordine di preferenza: è la classifica che ha fatto Leo giocando. 🥇 è il suo preferito.</p>
     <div class="grid" id="grid" aria-live="polite"></div>
     <div id="grid-vuota" class="vuoto hidden">Nessun regalo con questo filtro.</div>
 
@@ -399,7 +404,7 @@ nav.barra button.leo{color:var(--abete-2)}
       </section>
       <section class="box hidden" data-tab="gioco">
         <h2>🎲 Quale preferisci?</h2>
-        <p class="sub">Leo vede due regali alla volta (uno a sinistra e uno a destra col telefono in orizzontale, uno sopra l'altro in verticale) e tocca quello che gli piace di più. La prima partita su un gruppo è più lunga (con tutti i regali 50 scelte: ognuno compare circa due volte, e dopo il primo giro torna ogni tanto una coppia già vista a lati invertiti), così c'è subito una prima classifica; le partite dopo sono di 16 scelte e la rendono più precisa. Anche lì ogni 6 scelte torna una coppia già vista, a lati invertiti, per vedere se Leo conferma. Con 3 partite in tutto la stima è già buona.</p>
+        <p class="sub">Leo vede due regali alla volta (uno a sinistra e uno a destra col telefono in orizzontale, uno sopra l'altro in verticale) e tocca quello che gli piace di più. Il gioco è sempre su tutti i regali. La prima partita è più lunga (50 scelte: ognuno compare circa due volte, e dopo il primo giro torna ogni tanto una coppia già vista a lati invertiti), così c'è subito una prima classifica; le partite dopo sono di 16 scelte e la rendono più precisa. Anche lì ogni 6 scelte torna una coppia già vista, a lati invertiti, per vedere se Leo conferma. Con 3 partite in tutto la stima è già buona. I regali aggiunti dopo escono per primi nella partita successiva. La stessa classifica mette in ordine la lista che vedono i parenti.</p>
         <button class="btn primario full" id="g-gioca" type="button">▶ Gioca con Leo</button>
         <p class="small" style="margin:10px 0 0">Il gioco si apre anche dal pulsante 🦖 Leo in fondo alla lista, con la password del gioco (si cambia nelle Impostazioni). Per un'icona sulla Home: aprite il link in Safari, poi Condividi → «Aggiungi alla schermata Home». <button class="btn link" id="g-link-leo" type="button" style="padding:0">Copia il link per Leo</button></p>
         <div id="g-gioco-stat" class="small" style="margin-top:12px"></div>
@@ -448,7 +453,15 @@ nav.barra button.leo{color:var(--abete-2)}
 
 <div class="gioco hidden" id="gioco" aria-hidden="true">
   <div class="top"><button class="esci" id="gioco-esci" type="button" aria-label="Indietro">✕</button><div class="stelle" id="gioco-stelle"></div><button class="esci" id="gioco-gen" type="button" aria-label="Torna alla lista">🏠</button></div>
-  <div class="inizio" id="gioco-inizio"><div class="cats" id="gioco-cats"></div></div>
+  <div class="inizio" id="gioco-inizio">
+    <div class="intro">
+      <div class="regalone" aria-hidden="true">🎁</div>
+      <h2>Quale regalo ti piace di più?</h2>
+      <p id="gioco-spiega"></p>
+      <button class="ancora via" id="gioco-via" type="button" aria-label="Inizia">▶</button>
+      <span class="lbl">Inizia</span>
+    </div>
+  </div>
   <div class="campo hidden" id="gioco-campo">
     <button class="scelta" type="button" data-lato="s" aria-label="Regalo a sinistra"><img alt=""></button>
     <button class="scelta" type="button" data-lato="d" aria-label="Regalo a destra"><img alt=""></button>
@@ -456,12 +469,13 @@ nav.barra button.leo{color:var(--abete-2)}
   </div>
   <div class="fine hidden" id="gioco-fine">
     <div class="coriandoli" id="gioco-coriandoli"></div>
-    <div class="grande">🎄</div>
-    <div class="row" style="gap:22px;justify-content:center">
-      <button class="ancora" id="gioco-ancora" type="button" aria-label="Gioca ancora">▶</button>
-      <button class="ancora casa" id="gioco-casa" type="button" aria-label="Scegli altri giochi">🏠</button>
+    <div class="grande" aria-hidden="true">🎄</div>
+    <h2>Bravo Leo!</h2>
+    <p id="gioco-fine-txt"></p>
+    <div class="bottoni">
+      <div class="col"><button class="ancora" id="gioco-ancora" type="button" aria-label="Gioca ancora">▶</button><span class="lbl">Gioca ancora</span></div>
+      <div class="col"><button class="ancora casa" id="gioco-casa" type="button" aria-label="Ho finito">✓</button><span class="lbl">Ho finito</span></div>
     </div>
-    <button class="basta" id="gioco-fuori" type="button">Basta così</button>
   </div>
   <div class="fx" id="gioco-fx" aria-hidden="true"></div>
 </div>
@@ -606,6 +620,11 @@ async function carica(silenzioso){
   }
 }
 
+function posLeo(reg){
+  const r = reg.filter(g => g.leo_punti != null).sort((x, y) => (y.leo_punti - x.leo_punti) || (y.leo_scelte - x.leo_scelte));
+  return new Map(r.map((g, i) => [g.id, i + 1]));
+}
+const medaglia = n => n === 1 ? '🥇 1°' : n === 2 ? '🥈 2°' : n === 3 ? '🥉 3°' : `⭐ ${n}°`;
 function render(){
   if (!DATA) return;
   const imp = DATA.impostazioni || {};
@@ -625,7 +644,10 @@ function render(){
   if (filtro === 'liberi') lista = lista.filter(g => !g.preso);
   if (filtro === 'miei') lista = lista.filter(g => g.mio);
   if (cat) lista = lista.filter(g => inCat(g, cat));
+  const pos = posLeo(reg);
   if (filtro === 'prezzo') lista.sort((a,b) => (a.prezzo_cent ?? 1e9) - (b.prezzo_cent ?? 1e9));
+  else if (pos.size) lista.sort((a, b) => (pos.get(a.id) ?? 1e9) - (pos.get(b.id) ?? 1e9));
+  $('#ordine-leo').classList.toggle('hidden', !pos.size || filtro === 'prezzo');
   renderCat(reg);
   const grid = $('#grid'); grid.innerHTML = '';
   for (const g of lista) {
@@ -637,7 +659,8 @@ function render(){
       : `<div class="stato libero">Disponibile</div>`;
     const pt = prezzoTxt(g);
     const ph = galleria(fotoList(g), g.titolo, false);
-    if (g.eta && g.eta !== '—') { const bd = document.createElement('div'); bd.className = 'badges'; bd.innerHTML = `<span></span><span class="b eta">${esc(g.eta)}</span>`; ph.appendChild(bd); }
+    const eta = g.eta && g.eta !== '—', n = pos.get(g.id);
+    if (eta || n) { const bd = document.createElement('div'); bd.className = 'badges'; bd.innerHTML = (n ? `<span class="b leo" title="Posto nella classifica di Leo">${medaglia(n)}</span>` : '<span></span>') + (eta ? `<span class="b eta">${esc(g.eta)}</span>` : ''); ph.appendChild(bd); }
     card.appendChild(ph);
     const body = document.createElement('div'); body.className = 'body';
     body.innerHTML = `<div class="t">${esc(g.titolo)}</div><div class="meta">${esc(g.marca)}</div>
@@ -744,7 +767,9 @@ function apriRegalo(id){
       <input class="i" id="a-nota" maxlength="300" placeholder="Nota per i genitori (facoltativa)">
     </div>`;
   }
+  const n = posLeo(DATA.regali || []).get(g.id);
   apriDialog(`<div class="gal"></div>
+    ${n ? `<div class="small" style="margin-top:8px"><span class="b leo">${medaglia(n)}</span> nella classifica di Leo, su ${posLeo(DATA.regali || []).size} regali</div>` : ''}
     <h3>${esc(g.titolo)}</h3>
     <div class="small">${esc([g.marca, g.codice && g.codice !== '—' ? 'cod. ' + g.codice : '', g.eta && g.eta !== '—' ? 'età ' + g.eta : ''].filter(Boolean).join(' · '))}</div>
     <p>${esc(g.descrizione)}</p>
@@ -1051,10 +1076,12 @@ function visibili(){ return ((LEO ? LEODATA : (G && G.regali)) || []).filter(g =
 function prossimaCoppia(){
   const ids = GS.items.map(g => g.id), log = confronti(), st = statistiche(ids, log);
   const recenti = GS.recenti.slice(-2).flat();
+  // regali nuovi: prima si piazzano (circa 4 confronti ciascuno), poi la partita va avanti normale
+  let daPiazzare = [...GS.nuovi].filter(id => st[id] && st[id].n < 4);
   // ogni 6 scelte, se possibile, ripropone una coppia già vista a lati invertiti
   // (nella prima partita solo quando ogni regalo è già comparso una volta)
   const copertura = Math.min(...ids.map(id => st[id].n)) >= 1;
-  if (!GS.focus && (!GS.primo || copertura) && GS.fatte > 0 && GS.fatte % 6 === 5) {
+  if (!daPiazzare.length && (!GS.primo || copertura) && GS.fatte > 0 && GS.fatte % 6 === 5) {
     const vecchie = log.filter(c => ids.includes(c.a) && ids.includes(c.b) && !recenti.includes(c.a) && !recenti.includes(c.b) && !c.sessione.endsWith('-r'));
     if (vecchie.length) {
       const c = rnd(vecchie);
@@ -1065,14 +1092,14 @@ function prossimaCoppia(){
   const coppie = new Set(log.map(c => chiave(c.a, c.b)));
   let cand = ids.filter(id => !recenti.includes(id)); if (cand.length < 2) cand = ids.slice();
   let candA = cand;
-  if (GS.focus) { const fc = cand.filter(id => GS.focus.has(id)); candA = fc.length ? fc : ids.filter(id => GS.focus.has(id)); }
+  if (daPiazzare.length) { const fc = daPiazzare.filter(id => cand.includes(id)); candA = fc.length ? fc : daPiazzare; }
   const minN = Math.min(...candA.map(id => st[id].n));
   const a = rnd(candA.filter(id => st[id].n === minN));
   let pool = cand.filter(id => id !== a && !coppie.has(chiave(a, id)));
   if (!pool.length) pool = ids.filter(id => id !== a);
-  const consolidati = pool.filter(id => st[id].n >= 2 && !(GS.focus && GS.focus.has(id)));
+  const consolidati = pool.filter(id => st[id].n >= 2 && !GS.nuovi.has(id));
   let b;
-  if (!GS.primo && st[a].n < 2 && consolidati.length >= 3) {
+  if (GS.nuovi.has(a) && consolidati.length >= 3) {
     // piazzamento di un regalo nuovo: contro un regalo già in classifica di forza simile (sale o scende a ogni scelta)
     const f = forze(ids, log);
     consolidati.sort((x, y) => Math.abs(Math.log(f[x] / f[a])) - Math.abs(Math.log(f[y] / f[a])));
@@ -1259,13 +1286,12 @@ function schermo(nome){
   $('#gioco-stelle').classList.toggle('hidden', nome === 'inizio');
   $('#gioco-gen').classList.toggle('hidden', !(LEO && nome === 'inizio'));
   $('#gioco-esci').classList.toggle('hidden', LEO && nome === 'inizio');
-  $('#gioco-fuori').classList.toggle('hidden', LEO);
 }
 function disegnaStelle(){
   const box = $('#gioco-stelle'), pc = Math.round(GS.fatte * 100 / GS.lunghezza);
   if (!$('.pista', box)) box.innerHTML = '<div class="pista"><div class="fatto"></div></div><span class="slitta" aria-hidden="true">🛷</span><span class="arrivo" aria-hidden="true">🎁</span>';
   $('.fatto', box).style.width = pc + '%';
-  const sl = $('.slitta', box); sl.style.left = pc + '%';
+  const sl = $('.slitta', box); sl.style.left = `calc(4px + (100% - 66px) * ${pc / 100})`;
   sl.classList.remove('hop'); void sl.offsetWidth; if (GS.fatte) sl.classList.add('hop');
   box.setAttribute('aria-label', `${GS.fatte} su ${GS.lunghezza}`);
 }
@@ -1303,43 +1329,40 @@ function scegli(lato){
   });
   setTimeout(() => {
     if (!GS) return;
-    if (GS.fatte >= GS.lunghezza) { schermo('fine'); coriandoli(); suono('fine'); sincronizza(); }
+    if (GS.fatte >= GS.lunghezza) { testoFine(); schermo('fine'); coriandoli(); suono('fine'); sincronizza(); }
     else mostraCoppia();
   }, 900);
 }
-// scelta del tipo di regali (anche per Leo: si sceglie con le figure)
-function categorieGioco(){
-  const vis = visibili();
-  const out = [{k: '', e: '🎁', n: 'Tutti', c: '#E0453A', items: vis}];
-  CATEGORIE.forEach(([k, e, n, c]) => { const it = vis.filter(g => inCat(g, k)); if (it.length >= 3) out.push({k, e, n, c, items: it}); });
-  const nv = nuovi(vis); if (nv.length) out.push({k: '#nuovi', e: '🆕', n: 'Regali nuovi', c: '#FFC23D', items: vis, focus: nv});
-  return out;
+// il gioco è sempre su tutti i regali visibili: una sola classifica, la stessa che ordina la lista dei parenti
+function piano(){
+  const items = visibili(), ids = new Set(items.map(g => g.id));
+  const gia = confronti().filter(c => ids.has(c.a) && ids.has(c.b)).length;
+  const primo = gia < items.length / 2, nv = primo ? [] : nuovi(items);
+  const coppie = items.length * (items.length - 1) / 2;
+  const lunghezza = primo ? Math.min(PRIMA_MAX, Math.max(4, Math.ceil(items.length * 1.1)), coppie)
+    : Math.min(Math.max(ROUND, nv.length * 4), 30, coppie);
+  return {items, primo, nv, lunghezza};
 }
 function mostraInizio(){
   GS = null; schermo('inizio');
-  const box = $('#gioco-cats'); box.innerHTML = '';
-  categorieGioco().forEach(c => {
-    const b = document.createElement('button'); b.type = 'button'; b.className = 'cat' + (c.focus ? ' nuovi' : ''); b.style.setProperty('--c', c.c);
-    b.innerHTML = `<span class="em">${c.e}</span><span class="lb">${esc(c.n)}${c.focus ? ' (' + c.focus.length + ')' : ''}</span>`;
-    b.onclick = () => partita(c);
-    box.appendChild(b);
-  });
+  const pi = piano();
+  $('#gioco-spiega').textContent = 'Leo vede due regali alla volta e tocca quello che gli piace di più. ' +
+    (pi.primo ? `La prima volta sono ${pi.lunghezza} scelte, poi partite più corte.`
+      : pi.nv.length ? `Sono ${pi.lunghezza} scelte: ci sono ${pi.nv.length === 1 ? 'un regalo nuovo, che esce' : pi.nv.length + ' regali nuovi, che escono'} per primi.`
+      : `Sono ${pi.lunghezza} scelte.`) + ' Le sue scelte mettono in ordine la lista dei regali.';
 }
-function partita(c){
+function partita(){
+  const pi = piano();
+  if (pi.items.length < 2) { toast('Servono almeno due regali'); return; }
   suono('via');
-  const items = c.items;
-  if (items.length < 2) { toast('Servono almeno due regali'); return; }
-  const focus = c.focus ? new Set(c.focus.map(g => g.id)) : null;
-  const coppiePossibili = items.length * (items.length - 1) / 2;
-  // prima partita su un gruppo: più lunga, così ogni regalo compare circa due volte e c'è subito una stima
-  const ids = new Set(items.map(g => g.id));
-  const gia = confronti().filter(c2 => ids.has(c2.a) && ids.has(c2.b)).length;
-  const primo = !focus && gia < items.length / 2;
-  const lunghezza = focus ? Math.min(ROUND, focus.size * 4)
-    : primo ? Math.min(PRIMA_MAX, Math.max(4, Math.ceil(items.length * 1.1)), coppiePossibili)
-    : Math.min(ROUND, Math.max(4, coppiePossibili));
-  GS = {cat: c, items, mappa: new Map(items.map(g => [g.id, g])), focus, primo, lunghezza, id: nuovoId(), fatte: 0, recenti: [], pronto: false};
+  GS = {items: pi.items, mappa: new Map(pi.items.map(g => [g.id, g])), nuovi: new Set(pi.nv.map(g => g.id)), primo: pi.primo,
+        lunghezza: pi.lunghezza, id: nuovoId(), fatte: 0, recenti: [], pronto: false};
   schermo('campo'); disegnaStelle(); mostraCoppia();
+}
+function testoFine(){
+  $('#gioco-fine-txt').textContent = GS && GS.primo
+    ? 'Prima classifica pronta: la lista dei regali ora è in ordine con i suoi preferiti. Con un\'altra partita diventa più precisa.'
+    : 'Classifica aggiornata: la lista dei regali è in ordine con i suoi preferiti.';
 }
 async function apriGioco(){
   if (!LEO && !G) { toast('Lista non ancora caricata'); return; }
@@ -1360,9 +1383,15 @@ $('#gioco-esci').onclick = () => {
   else if (!LEO) chiudiGioco();
 };
 $('#gioco-gen').onclick = () => { if (confirm('Uscire dal gioco di Leo e tornare alla lista?')) location.hash = ''; };
-$('#gioco-ancora').onclick = () => partita(GS.cat);
-$('#gioco-casa').onclick = () => mostraInizio();
-$('#gioco-fuori').onclick = chiudiGioco;
+$('#gioco-via').onclick = () => partita();
+$('#gioco-ancora').onclick = () => partita();
+// «Ho finito»: salva le scelte e torna alla lista (Leo) o alla classifica (area genitori)
+$('#gioco-casa').onclick = async () => {
+  const b = $('#gioco-casa'); b.disabled = true;
+  try { await sincronizza(); } catch(e) {}
+  b.disabled = false;
+  if (LEO) location.hash = ''; else chiudiGioco();
+};
 $('#gioco').addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 $('#g-gioca').onclick = () => { suono('via'); apriGioco(); };
 $('#g-link-leo').onclick = async () => {
@@ -1382,7 +1411,7 @@ function gGioco(){
   let rip = 0, ug = 0; per.forEach(vs => { if (vs.length > 1) { rip += vs.length - 1; vs.slice(1).forEach(v => { if (v === vs[0]) ug++; }); } });
   const medi = ids.length ? (log.length * 2 / ids.length) : 0, nv = nuovi(tutti);
   const righe = [`<b>${log.length}</b> scelte fatte · in media ${medi.toFixed(1).replace('.', ',')} per regalo${medi < 2.5 ? ' (per una buona stima servono circa 2,5: con tutti i regali sono 3 partite)' : ''}`];
-  if (nv.length) righe.push(`🆕 ${nv.length} regali nuovi da piazzare: nel gioco toccate la figura 🆕 (bastano ${Math.min(ROUND, nv.length * 4)} scelte)`);
+  if (nv.length) righe.push(`🆕 ${nv.length} regali nuovi: la prossima partita li fa vedere per primi, così trovano il loro posto in classifica`);
   if (conLato >= 10) { const pc = Math.round(sx * 100 / conLato); righe.push(`Ha scelto il regalo a sinistra (o in alto) il ${pc}% delle volte${pc >= 75 || pc <= 25 ? ' — tende a toccare sempre lo stesso lato: prendete la classifica con le pinze' : ''}`); }
   if (rip >= 3) righe.push(`Coppie riproposte: ha confermato la scelta ${ug} volte su ${rip}`);
   righe.push('Le scelte recenti contano di più: dopo due settimane una scelta vale la metà.');
