@@ -133,6 +133,21 @@ section.box p.sub{margin:0 0 12px;color:var(--grigio);font-size:14.5px}
 .btn.verde{background:var(--abete);color:#fff;box-shadow:0 4px 0 var(--abete-2)}
 .btn.chiaro{background:#EEF1F8;color:var(--notte)}
 .btn.link{background:transparent;color:var(--abete);padding:8px 4px;font-weight:500;box-shadow:none}
+.codice{font-family:var(--f-titolo);font-weight:600;font-size:30px;letter-spacing:3px;text-align:center;color:var(--notte);background:var(--neve);border:2px dashed var(--oro);border-radius:14px;padding:10px 14px;-webkit-user-select:all;user-select:all}
+.codice-box{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:space-between;margin-top:14px;padding:12px;border-radius:14px;background:#FFF8E6}
+.codice-box .codice{font-size:24px;padding:6px 12px}
+.carrello li.cr{display:grid;grid-template-columns:64px 1fr;gap:6px 12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--linea)}
+.carrello li.cr:last-child{border-bottom:0}
+.carrello .cr img{width:64px;height:64px;object-fit:contain;background:#fff;border:1px solid var(--linea);border-radius:12px;padding:3px;grid-row:span 2;cursor:pointer}
+.carrello .cr-t{cursor:pointer;min-width:0}
+.carrello .cr-t b{display:block;line-height:1.25}
+.carrello .cr-p{font-family:var(--f-titolo);font-weight:600;color:var(--velluto);margin-top:2px}
+.carrello .cr-a{display:flex;gap:8px;flex-wrap:wrap}
+.carrello .cr-a .btn{padding:6px 12px;font-size:13px}
+.car-tot{display:flex;flex-direction:column;gap:2px;margin-top:6px;padding-top:10px;border-top:2px solid var(--linea);font-size:14px}
+.car-tot:empty{display:none}
+.car-tot .t{display:flex;justify-content:space-between;font-family:var(--f-titolo);font-weight:600;font-size:18px;color:var(--inchiostro)}
+.i.codice-in{font-family:var(--f-titolo);font-size:24px;letter-spacing:3px;text-align:center;text-transform:uppercase}
 .btn.mini{padding:8px 12px;font-size:14px;border-radius:11px;box-shadow:none}
 .btn.primario.mini{box-shadow:0 3px 0 var(--rosso-2)}.btn.verde.mini{box-shadow:0 3px 0 var(--abete-2)}
 .btn[disabled]{opacity:.5;cursor:default}
@@ -308,10 +323,16 @@ nav.barra button.leo{color:var(--abete-2)}
     <div id="grid-vuota" class="vuoto hidden">Nessun regalo con questo filtro.</div>
 
     <section class="box" id="sez-miei">
-      <h2>🎁 I tuoi regali</h2>
+      <h2>🛒 Il tuo carrello</h2>
       <p class="sub" id="miei-sub">Qui trovi i regali che hai prenotato.</p>
-      <ul class="lista" id="miei-lista"></ul>
+      <ul class="lista carrello" id="miei-lista"></ul>
+      <div class="car-tot" id="miei-tot"></div>
       <div id="rimborso-box" class="avviso hidden"></div>
+      <div class="codice-box hidden" id="miei-codice">
+        <div><b>🔑 Il tuo codice personale</b><div class="small">Ti serve se apri la lista da un altro telefono o browser: lì scrivilo per ritrovare i tuoi regali.</div></div>
+        <div class="codice" id="miei-codice-v"></div>
+      </div>
+      <button class="btn link" id="miei-ho-codice" type="button">Hai prenotato da un altro telefono o browser? Scrivi il tuo codice</button>
     </section>
 
     <section class="box" id="sez-altro">
@@ -482,7 +503,7 @@ nav.barra button.leo{color:var(--abete-2)}
 
 <nav class="barra" id="barra">
   <button type="button" data-go="top" class="on"><span class="ic">🎄</span>Lista</button>
-  <button type="button" data-go="sez-miei"><span class="ic">🎁</span>I miei<span class="dot hidden" id="dot-miei"></span></button>
+  <button type="button" data-go="carrello"><span class="ic">🛒</span>Carrello<span class="dot hidden" id="dot-miei"></span></button>
   <button type="button" data-go="sez-altro"><span class="ic">🎀</span>Altro</button>
   <button type="button" data-go="sez-proponi"><span class="ic">💡</span>Proponi</button>
   <button type="button" data-go="leo" class="leo"><span class="ic">🦖</span>Leo</button>
@@ -683,20 +704,73 @@ function renderCat(reg){
   $$('.chip', box).forEach(b => b.onclick = () => { cat = b.dataset.c; render(); });
 }
 
+function rigaCarrello(g, dopo){
+  const p = Object.assign({}, g.prenotazione || {}); if (p.importo_cent == null) p.importo_cent = g.prezzo_cent;
+  const modo = g.modo === 'genitori'
+    ? (p.comprato ? 'Comprato dai genitori' : 'Lo comprano i genitori') + (p.rimborsato ? ' · rimborsato ✔︎' : ' · da rimborsare')
+    : 'Lo compri tu';
+  const li = document.createElement('li'); li.className = 'cr';
+  const info = linkInfo(g), prezzo = g.modo === 'genitori' && p.importo_cent != null ? euro(p.importo_cent) : prezzoTxt(g);
+  li.innerHTML = `<img alt="">
+    <div class="cr-t"><b>${esc(g.titolo)}</b><div class="small">${esc(modo)}</div>${prezzo ? `<div class="cr-p">${esc(prezzo)}</div>` : ''}</div>
+    <div class="cr-a">${info.url && g.modo !== 'genitori' ? `<a class="btn chiaro" href="${esc(info.url)}" target="_blank" rel="noopener">${esc(info.label)} ↗</a>` : ''}${p.comprato ? '<span class="small">già comprato</span>' : '<button class="btn chiaro" type="button" data-togli>Togli</button>'}</div>`;
+  const img = $('img', li); fillImg(img, primaFoto(g));
+  img.onclick = $('.cr-t', li).onclick = () => apriRegalo(g.id);
+  const t = $('[data-togli]', li);
+  if (t) t.onclick = async () => {
+    if (!confirm(`Togliere «${g.titolo}» dal tuo carrello? Il regalo torna disponibile per gli altri.`)) return;
+    t.disabled = true;
+    const r = await rpc('natale_annulla', {p_regalo:g.id, p_token:TOKEN}).catch(() => ({}));
+    toast(r.ok ? 'Tolto dal carrello' : 'Non è stato possibile toglierlo'); await carica(); if (dopo) dopo();
+  };
+  return li;
+}
+function totaleCarrello(miei){
+  let io = 0, gen = 0, ignoti = 0;
+  miei.forEach(g => { const p = g.prenotazione || {}; const c = p.importo_cent ?? g.prezzo_cent;
+    if (c == null) { ignoti++; return; } if (g.modo === 'genitori') gen += c; else io += c; });
+  if (!miei.length) return '';
+  const righe = [`<div class="t"><span>Totale</span><span>${esc(euro(io + gen))}${ignoti ? ' + ?' : ''}</span></div>`];
+  if (io && gen) righe.push(`<div class="small">Da comprare tu: ${esc(euro(io))} · da rimborsare ai genitori: ${esc(euro(gen))}</div>`);
+  if (ignoti) righe.push(`<div class="small">${ignoti === 1 ? 'Un regalo non ha' : ignoti + ' regali non hanno'} ancora il prezzo: vedi su Amazon.</div>`);
+  return righe.join('');
+}
+function apriCarrello(){
+  const disegna = () => {
+    const b = $('#car-box'); if (!b) return;
+    const miei = (DATA && DATA.regali || []).filter(g => g.mio);
+    $('#car-sub', b).textContent = miei.length
+      ? `${miei.length === 1 ? 'Un regalo' : miei.length + ' regali'} a nome di ${nome || 'te'}. Tocca un regalo per vederlo, «Togli» per lasciarlo agli altri.`
+      : 'Il carrello è vuoto: tocca un regalo nella lista e poi «Lo regalo io».';
+    const ul = $('#car-lista', b); ul.innerHTML = ''; miei.forEach(g => ul.appendChild(rigaCarrello(g, disegna)));
+    $('#car-tot', b).innerHTML = totaleCarrello(miei);
+    const c = miei.length ? LS.get('codice', '') : '';
+    $('#car-cod', b).innerHTML = c ? `<div class="codice-box"><div><b>🔑 Il tuo codice personale</b><div class="small">Scrivilo su un altro telefono o browser per ritrovare questo carrello.</div></div><div class="codice">${esc(c)}</div></div>` : '';
+  };
+  apriDialog(`<div id="car-box"><h3>🛒 Il tuo carrello</h3><p class="small" id="car-sub"></p>
+    <ul class="lista carrello" id="car-lista"></ul><div class="car-tot" id="car-tot"></div><div id="car-cod"></div>
+    <button class="btn link full" id="car-ho-codice" type="button">Hai prenotato da un altro telefono o browser? Scrivi il tuo codice</button></div>`, b => {
+    $('#car-ho-codice', b).onclick = () => { dlg.close(); usaCodice(); };
+    disegna();
+    if ((DATA && DATA.regali || []).some(g => g.mio) && !LS.get('codice', '')) mioCodice().then(disegna);
+  });
+}
+
 function renderMiei(){
   const ul = $('#miei-lista'); ul.innerHTML = '';
   const miei = (DATA.regali || []).filter(g => g.mio);
-  $('#miei-sub').textContent = miei.length ? 'Ecco cosa hai scelto. Puoi annullare finché non è stato comprato.' : 'Non hai ancora prenotato niente: scegli un regalo dalla lista qui sopra.';
+  const qualcosa = miei.length || (DATA.altri || []).some(a => a.mio) || (DATA.mie_proposte || []).length;
+  const mostra = c => { $('#miei-codice').classList.toggle('hidden', !c); $('#miei-codice-v').textContent = c || ''; };
+  mostra(qualcosa ? LS.get('codice', '') : '');
+  if (qualcosa && !codiceChiesto) { codiceChiesto = true; mioCodice().then(mostra); }
+  $('#miei-sub').textContent = miei.length ? 'Ecco cosa hai scelto. Puoi togliere un regalo finché non è stato comprato.' : 'Il carrello è vuoto: scegli un regalo dalla lista qui sopra e tocca «Lo regalo io».';
   let daRimb = 0, daRimbNoto = true;
   for (const g of miei) {
-    const li = document.createElement('li');
     const p = Object.assign({}, g.prenotazione || {}); if (p.importo_cent == null) p.importo_cent = g.prezzo_cent;
-    let extra = g.modo === 'genitori' ? (p.comprato ? 'Comprato dai genitori' : 'Lo comprano i genitori') + (p.rimborsato ? ' · rimborsato ✔︎' : ' · da rimborsare') : 'Lo compri tu';
     if (g.modo === 'genitori' && !p.rimborsato) { if (p.importo_cent != null) daRimb += p.importo_cent; else daRimbNoto = false; }
-    li.innerHTML = `<div><b>${esc(g.titolo)}</b><div class="small">${esc(extra)}${p.importo_cent != null && g.modo === 'genitori' ? ' · ' + esc(euro(p.importo_cent)) : ''}</div></div>`;
-    const b = document.createElement('button'); b.className = 'btn chiaro mini x'; b.type = 'button'; b.textContent = 'Apri';
-    b.onclick = () => apriRegalo(g.id); li.appendChild(b); ul.appendChild(li);
+    ul.appendChild(rigaCarrello(g));
   }
+  $('#miei-tot').innerHTML = totaleCarrello(miei);
   const rb = $('#rimborso-box');
   const conGen = miei.filter(g => g.modo === 'genitori' && !(g.prenotazione || {}).rimborsato);
   if (conGen.length) {
@@ -741,12 +815,54 @@ dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
 
 function chiediNome(poi){
   apriDialog(`<h3>Come ti chiami?</h3><p class="small">Così Maurizio e Rachele sanno chi regala cosa. Basta il nome (es. «Nonna Anna», «Zio Paolo»).</p>
-    <form id="f-nome" class="stack"><input class="i" id="nome-in" maxlength="40" required autocomplete="name" value="${esc(nome)}"><button class="btn verde" type="submit">Continua</button></form>`, b => {
+    <form id="f-nome" class="stack"><input class="i" id="nome-in" maxlength="40" required autocomplete="name" value="${esc(nome)}"><button class="btn verde" type="submit">Continua</button></form>
+    <button class="btn link full" id="nome-cod" type="button">Hai già prenotato da un altro telefono o browser? Ho un codice</button>`, b => {
     const inp = $('#nome-in', b); setTimeout(() => inp.focus(), 50);
+    $('#nome-cod', b).onclick = () => { dlg.close(); usaCodice(); };
     $('#f-nome', b).onsubmit = e => { e.preventDefault(); const v = inp.value.trim(); if (!v) return; nome = v; LS.set('nome', v); dlg.close(); render(); if (poi) poi(); };
   });
 }
 $('#btn-nome').onclick = () => chiediNome();
+
+// Codice personale: il telefono si riconosce da un codice salvato nel browser; su un altro telefono
+// o browser quel codice manca, e il codice personale serve a ritrovare i propri regali.
+async function mioCodice(){
+  try { const r = await rpc('natale_mio_codice', {p_token: TOKEN}); LS.set('codice', r.codice || ''); return r.codice || ''; }
+  catch(e) { return LS.get('codice', ''); }
+}
+function mostraCodice(cod, primo){
+  apriDialog(`<h3>${primo ? '🎁 Fatto! Segnati il tuo codice' : '🔑 Il tuo codice personale'}</h3>
+    <p class="small">Ti serve solo se apri la lista da un altro telefono o da un altro browser: lì tocca «Ho un codice» e scrivilo, così ritrovi i tuoi regali e puoi ancora cambiarli. Lo trovi sempre anche nel «Carrello».</p>
+    <div class="codice">${esc(cod)}</div>
+    <p class="small">Puoi anche fare uno screenshot di questa schermata.</p>
+    <div class="stack"><button class="btn verde full" id="c-copia" type="button">Copia il codice</button><button class="btn chiaro full" id="c-ok" type="button">Ok</button></div>`, b => {
+    $('#c-copia', b).onclick = async () => { try { await navigator.clipboard.writeText(cod); toast('Codice copiato'); } catch(e) { toast('Tieni premuto sul codice per copiarlo'); } };
+    $('#c-ok', b).onclick = () => dlg.close();
+  });
+}
+function usaCodice(){
+  apriDialog(`<h3>🔑 Ritrova i tuoi regali</h3>
+    <p class="small">Scrivi il codice personale che la lista ti ha dato dopo la prima prenotazione. Sull'altro telefono lo trovi nel «Carrello».</p>
+    <form id="f-cod" class="stack"><input class="i codice-in" id="cod-in" maxlength="12" required autocapitalize="characters" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="ABCD-EFGH"><button class="btn verde" type="submit">Ritrova i miei regali</button></form>`, b => {
+    const inp = $('#cod-in', b); setTimeout(() => inp.focus(), 50);
+    $('#f-cod', b).onsubmit = async e => {
+      e.preventDefault(); const btn = $('button', e.target); btn.disabled = true;
+      try {
+        const r = await rpc('natale_usa_codice', {p_token: TOKEN, p_codice: inp.value});
+        if (r.ok) {
+          const c = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+          if (r.nome) { nome = r.nome; LS.set('nome', r.nome); }
+          LS.set('codice', c.slice(0, 4) + '-' + c.slice(4)); LS.set('codice_visto', LS.get('codice', ''));
+          dlg.close(); toast(r.regali ? `Fatto! Ritrovati ${r.regali === 1 ? '1 regalo' : r.regali + ' regali'} 🎁` : 'Fatto: telefono collegato'); carica(); return;
+        }
+        toast(r.errore === 'troppi' ? 'Troppi tentativi: riprova tra qualche minuto' : 'Codice non trovato: controllalo e riprova');
+      } catch(e) { toast('Errore di connessione, riprova'); }
+      btn.disabled = false;
+    };
+  });
+}
+$('#miei-ho-codice').onclick = usaCodice;
+let codiceChiesto = false;
 function conNome(fn){ if (nome) fn(); else chiediNome(fn); }
 
 function apriRegalo(id){
@@ -782,7 +898,11 @@ function apriRegalo(id){
       [io, gen].forEach(x => x && (x.disabled = true));
       try {
         const r = await rpc('natale_prenota', {p_regalo:g.id, p_nome:nome, p_token:TOKEN, p_modo:modo, p_nota:($('#a-nota', b) || {}).value || '', p_anonimo:!!($('#a-anon', b) || {}).checked});
-        if (r.ok) { dlg.close(); toast(modo === 'io' ? 'Fatto! Il regalo è tuo 🎁' : 'Fatto! Lo comprano i genitori 🛒'); }
+        if (r.ok) {
+          dlg.close(); toast(modo === 'io' ? 'Aggiunto al tuo carrello 🛒' : 'Aggiunto al carrello: lo comprano i genitori 🛒');
+          const cod = await mioCodice();
+          if (cod && LS.get('codice_visto', '') !== cod) { LS.set('codice_visto', cod); mostraCodice(cod, true); }
+        }
         else if (r.errore === 'preso') { dlg.close(); toast('Peccato: qualcuno l\'ha appena preso'); }
         else toast('Qualcosa non va, riprova');
       } catch(e) { toast('Errore di connessione, riprova'); }
@@ -808,6 +928,7 @@ $$('#toolbar [data-f]').forEach(c => c.onclick = () => {
 $$('#barra button').forEach(b => b.onclick = () => {
   const t = b.dataset.go;
   if (t === 'leo') { location.hash = '#leo'; return; }
+  if (t === 'carrello') { apriCarrello(); return; }
   if (t === 'top') window.scrollTo({top:0, behavior:'smooth'}); else document.getElementById(t).scrollIntoView({behavior:'smooth', block:'start'});
   $$('#barra button').forEach(x => x.classList.toggle('on', x === b));
 });
