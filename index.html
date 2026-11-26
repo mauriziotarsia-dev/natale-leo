@@ -191,6 +191,10 @@ nav.barra button.leo{color:var(--abete-2)}
 
 /* ---------- area genitori ---------- */
 .tabs{display:flex;gap:6px;overflow-x:auto;margin:16px 0 4px;scrollbar-width:none}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;margin:4px 0 12px;background:var(--neve);border-radius:16px}
+.seg button{border:0;border-radius:12px;padding:11px 8px;font-family:var(--f-titolo);font-weight:500;font-size:15px;color:var(--grigio);background:transparent}
+.seg button[aria-checked="true"]{background:#fff;color:var(--inchiostro);box-shadow:0 2px 8px rgba(27,33,66,.12)}
+#pr-link-info.ok{color:var(--abete)} #pr-link-info.no{color:var(--velluto)}
 .tabs::-webkit-scrollbar{display:none}
 .g-card{display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--linea);align-items:flex-start}
 .g-card:first-child{border-top:0}
@@ -347,20 +351,23 @@ nav.barra button.leo{color:var(--abete-2)}
     </section>
 
     <section class="box" id="sez-proponi">
-      <h2>💡 Proponi un'idea ai genitori</h2>
-      <p class="sub">La vedono solo Maurizio e Rachele: se gli va bene la aggiungono alla lista.</p>
+      <h2>💡 Proponi un regalo</h2>
+      <p class="sub">La proposta la vedono solo Maurizio e Rachele: se va bene la aggiungono alla lista. Se vuoi regalarla tu, è già prenotata a tuo nome.</p>
+      <div class="seg" role="radiogroup" aria-label="Cosa proponi">
+        <button type="button" role="radio" aria-checked="true" data-tipo="amazon">🛒 Link Amazon</button>
+        <button type="button" role="radio" aria-checked="false" data-tipo="idea">💡 Un'idea</button>
+      </div>
       <form id="f-proponi">
-        <label class="f" for="pr-titolo">Cosa vorresti regalare?</label>
-        <input class="i" id="pr-titolo" maxlength="120" required placeholder="Es. pista delle macchinine">
-        <label class="f" for="pr-link">Link (facoltativo)</label>
-        <input class="i" id="pr-link" type="url" inputmode="url" maxlength="600" placeholder="https://www.amazon.it/…">
-        <label class="f" for="pr-prezzo">Prezzo indicativo (facoltativo)</label>
-        <input class="i" id="pr-prezzo" maxlength="40" placeholder="Es. 25 €">
-        <label class="f" for="pr-nota">Note (facoltativo)</label>
+        <div id="pr-amazon">
+          <label class="f" for="pr-link">Link di Amazon</label>
+          <textarea class="i" id="pr-link" rows="2" maxlength="1000" placeholder="Incolla qui il link del gioco"></textarea>
+          <p class="small" id="pr-link-info">Nell'app Amazon: apri il gioco, tocca «Condividi» e poi «Copia». Basta il link.</p>
+        </div>
+        <label class="f" for="pr-titolo" id="pr-titolo-lbl">Che gioco è? (facoltativo)</label>
+        <input class="i" id="pr-titolo" maxlength="120" placeholder="Es. pista delle macchinine">
+        <label class="f" for="pr-nota">Note per i genitori (facoltativo)</label>
         <textarea class="i" id="pr-nota" maxlength="500"></textarea>
-        <label class="f" for="pr-foto">Foto (facoltativa)</label>
-        <input class="i" id="pr-foto" type="file" accept="image/*">
-        <label class="check"><input type="checkbox" id="pr-mio" checked> <span>Se lo approvano, lo regalo io</span></label>
+        <label class="check"><input type="checkbox" id="pr-mio" checked> <span>Lo regalo io: se lo aggiungono, è già prenotato a mio nome</span></label>
         <button class="btn verde full" type="submit">Invia ai genitori</button>
       </form>
       <ul class="lista" id="proposte-lista" style="margin-top:12px"></ul>
@@ -420,7 +427,7 @@ nav.barra button.leo{color:var(--abete-2)}
       </section>
       <section class="box hidden" data-tab="proposte">
         <h2>Proposte dei parenti</h2>
-        <p class="sub">Le vedete solo voi. Approvando, il regalo entra in lista (e, se richiesto, resta prenotato da chi l'ha proposto).</p>
+        <p class="sub">Le vedete solo voi. Arrivano come link di Amazon o come idea scritta. Approvando, il regalo entra in lista (e, se richiesto, resta prenotato da chi l'ha proposto) e si apre la sua scheda per completare nome, foto, prezzo e categoria.</p>
         <div id="g-proposte"></div>
       </section>
       <section class="box hidden" data-tab="gioco">
@@ -744,11 +751,13 @@ function apriCarrello(){
       : 'Il carrello è vuoto: tocca un regalo nella lista e poi «Lo regalo io».';
     const ul = $('#car-lista', b); ul.innerHTML = ''; miei.forEach(g => ul.appendChild(rigaCarrello(g, disegna)));
     $('#car-tot', b).innerHTML = totaleCarrello(miei);
+    const att = (DATA && DATA.mie_proposte || []).filter(p => p.stato === 'nuova' && p.lo_regalo_io);
+    $('#car-prop', b).innerHTML = att.length ? `<div class="avviso"><b>In attesa dei genitori</b><br>${att.map(p => esc(p.titolo)).join('<br>')}<div class="small">Le hai proposte tu: se le aggiungono alla lista, finiscono qui a tuo nome.</div></div>` : '';
     const c = miei.length ? LS.get('codice', '') : '';
     $('#car-cod', b).innerHTML = c ? `<div class="codice-box"><div><b>🔑 Il tuo codice personale</b><div class="small">Scrivilo su un altro telefono o browser per ritrovare questo carrello.</div></div><div class="codice">${esc(c)}</div></div>` : '';
   };
   apriDialog(`<div id="car-box"><h3>🛒 Il tuo carrello</h3><p class="small" id="car-sub"></p>
-    <ul class="lista carrello" id="car-lista"></ul><div class="car-tot" id="car-tot"></div><div id="car-cod"></div>
+    <ul class="lista carrello" id="car-lista"></ul><div class="car-tot" id="car-tot"></div><div id="car-prop" style="margin-top:12px"></div><div id="car-cod"></div>
     <button class="btn link full" id="car-ho-codice" type="button">Hai prenotato da un altro telefono o browser? Scrivi il tuo codice</button></div>`, b => {
     $('#car-ho-codice', b).onclick = () => { dlg.close(); usaCodice(); };
     disegna();
@@ -794,10 +803,10 @@ function renderAltri(){
 }
 function renderProposte(){
   const ul = $('#proposte-lista'); ul.innerHTML = '';
-  const st = {nuova:'in attesa', approvata:'approvata ✔︎', scartata:'non approvata'};
+  const st = {nuova:'in attesa dei genitori', approvata:'aggiunta alla lista ✔︎', scartata:'non aggiunta'};
   for (const p of (DATA.mie_proposte || [])) {
-    const li = document.createElement('li');
-    li.innerHTML = `<div>La tua proposta <b>${esc(p.titolo)}</b> · <span class="small">${esc(st[p.stato] || p.stato)}</span></div>`;
+    const li = document.createElement('li'), lk = safeUrl(p.link);
+    li.innerHTML = `<div><b>${esc(p.titolo)}</b><div class="small">${esc(st[p.stato] || p.stato)}${p.stato === 'nuova' && p.lo_regalo_io ? ' · se la aggiungono è già tua' : ''}${p.stato === 'approvata' && p.lo_regalo_io ? ' · è nel tuo carrello' : ''}</div></div>${lk ? `<a class="btn chiaro mini" href="${esc(lk)}" target="_blank" rel="noopener">Amazon ↗</a>` : ''}`;
     ul.appendChild(li);
   }
 }
@@ -939,17 +948,55 @@ $('#f-altro').onsubmit = e => { e.preventDefault(); conNome(async () => {
   const r = await rpc('natale_altro', {p_nome:nome, p_token:TOKEN, p_descrizione:d, p_privato:$('#altro-priv').checked}).catch(() => ({}));
   if (r.ok) { $('#altro-desc').value = ''; $('#altro-priv').checked = false; toast('Aggiunto, grazie!'); carica(); } else toast('Non sono riuscito a salvarlo, riprova');
 }); };
+// Proposte: solo un gioco di Amazon (basta il link) oppure un'idea scritta
+let tipoProposta = 'amazon';
+function amazonDa(testo){
+  const m = String(testo || '').match(/https?:\/\/[^\s"'<>]+/i); if (!m) return null;
+  let u; try { u = new URL(m[0]); } catch(e) { return null; }
+  const h = u.hostname.toLowerCase().replace(/^(www|m|smile)\./, '');
+  if (!/^(amazon\.(it|com|de|fr|es|co\.uk|nl|be|com\.be|se|pl|at|ch|ca)|amzn\.(eu|to|com)|a\.co)$/.test(h)) return null;
+  // il testo che l'app Amazon mette insieme al link di solito contiene il nome del prodotto
+  let t = String(testo).replace(m[0], ' ').replace(/\s+/g, ' ').trim()
+    .replace(/^(guarda|dai un['’]occhiata|ho trovato|check out|look at)[^:]*:\s*/i, '')
+    .replace(/^(dai un['’]occhiata a|guarda questo prodotto|guarda|ho trovato|check out|look at)\s+/i, '')
+    .replace(/^amazon\.[a-z.]+\s*:\s*/i, '').replace(/\s*(su|on|at)\s+amazon\.?[a-z.]*\s*$/i, '')
+    .replace(/^["“«']+|["”»']+$/g, '').trim();
+  if (t.length < 4) t = '';
+  const asin = (u.pathname.match(/\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})/i) || [])[1];
+  const link = asin ? `https://www.${h}/dp/${asin.toUpperCase()}` : 'https://' + u.hostname + u.pathname + (h.startsWith('amazon.') ? '' : u.search);
+  return {link, titolo: t.slice(0, 120)};
+}
+function tipoProp(t){
+  tipoProposta = t;
+  $$('#sez-proponi .seg button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.tipo === t)));
+  $('#pr-amazon').classList.toggle('hidden', t !== 'amazon');
+  $('#pr-titolo-lbl').textContent = t === 'amazon' ? 'Che gioco è? (facoltativo)' : 'Che cosa vorresti regalare?';
+  $('#pr-titolo').placeholder = t === 'amazon' ? 'Es. pista delle macchinine' : 'Es. un libro di dinosauri con le alette';
+}
+$$('#sez-proponi .seg button').forEach(b => b.onclick = () => tipoProp(b.dataset.tipo));
+$('#pr-link').oninput = () => {
+  const v = $('#pr-link').value.trim(), a = amazonDa(v), info = $('#pr-link-info');
+  info.className = 'small' + (v ? (a ? ' ok' : ' no') : '');
+  info.textContent = !v ? "Nell'app Amazon: apri il gioco, tocca «Condividi» e poi «Copia». Basta il link."
+    : a ? '✓ Link di Amazon' : 'Questo non sembra un link di Amazon: si possono proporre solo giochi di Amazon, oppure un\'idea scritta.';
+  if (a && a.titolo && !$('#pr-titolo').value.trim()) $('#pr-titolo').value = a.titolo;
+};
 $('#f-proponi').onsubmit = e => { e.preventDefault(); conNome(async () => {
+  let link = '', titolo = $('#pr-titolo').value.trim();
+  if (tipoProposta === 'amazon') {
+    const a = amazonDa($('#pr-link').value);
+    if (!a) { toast('Incolla il link di un gioco di Amazon'); $('#pr-link').focus(); return; }
+    link = a.link; titolo = titolo || a.titolo;
+  } else if (!titolo) { toast('Scrivi la tua idea'); $('#pr-titolo').focus(); return; }
   const btn = $('#f-proponi button[type=submit]'); btn.disabled = true; btn.textContent = 'Invio…';
   try {
-    let foto = '';
-    const f = $('#pr-foto').files[0]; if (f) foto = await resizeImage(f);
-    const link = $('#pr-link').value.trim();
-    const r = await rpc('natale_proponi', {p_nome:nome, p_token:TOKEN, p_titolo:$('#pr-titolo').value.trim(), p_link: safeUrl(link) || link,
-      p_prezzo:$('#pr-prezzo').value.trim(), p_nota:$('#pr-nota').value.trim(), p_foto:foto, p_lo_regalo_io:$('#pr-mio').checked});
-    if (r.ok) { $('#f-proponi').reset(); $('#pr-mio').checked = true; toast('Proposta inviata ai genitori 💡'); carica(); }
-    else toast('Non sono riuscito a inviarla, riprova');
-  } catch(err) { toast('Errore: riprova (magari con una foto più piccola)'); }
+    const mio = $('#pr-mio').checked;
+    const r = await rpc('natale_proponi', {p_nome:nome, p_token:TOKEN, p_titolo:titolo, p_link:link, p_nota:$('#pr-nota').value.trim(), p_lo_regalo_io:mio});
+    if (r.ok) {
+      $('#f-proponi').reset(); $('#pr-mio').checked = true; $('#pr-link').oninput();
+      toast(mio ? 'Inviata: se la aggiungono è già tua 🎁' : 'Proposta inviata ai genitori 💡'); carica();
+    } else toast(r.errore === 'link' ? 'Si possono proporre solo link di Amazon' : 'Non sono riuscito a inviarla, riprova');
+  } catch(err) { toast('Errore di connessione, riprova'); }
   btn.disabled = false; btn.textContent = 'Invia ai genitori';
 }); };
 
@@ -1023,9 +1070,14 @@ function gRender(){
     const lk = safeUrl(p.link);
     info.innerHTML = `<b>${esc(p.titolo)}</b><div class="small">da <b>${esc(p.nome)}</b>${p.prezzo ? ' · ' + esc(p.prezzo) : ''}${p.lo_regalo_io ? ' · <span class="tag v">lo regala lui/lei</span>' : ''}
       <span class="tag ${p.stato === 'nuova' ? 'o' : p.stato === 'approvata' ? 'v' : 'r'}">${esc(p.stato)}</span>${p.nota ? '<br>«' + esc(p.nota) + '»' : ''}</div>
-      <div class="row" style="margin-top:6px">${lk ? `<a class="btn chiaro mini" href="${esc(lk)}" target="_blank" rel="noopener">Apri link ↗</a>` : (p.link ? `<span class="small">${esc(p.link)}</span>` : '')}</div>`;
+      <div class="row" style="margin-top:6px">${lk ? `<a class="btn chiaro mini" href="${esc(lk)}" target="_blank" rel="noopener">Apri su Amazon ↗</a>` : (p.link ? `<span class="small">${esc(p.link)}</span>` : '<span class="small">idea senza link</span>')}</div>`;
     const row = $('.row', info);
-    const mk = (t, cls, az) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn mini ' + cls; b.textContent = t; b.onclick = () => gAct('natale_g_proposta', {p_id:p.id, p_azione:az}, 'Fatto'); row.appendChild(b); };
+    const mk = (t, cls, az) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn mini ' + cls; b.textContent = t;
+      b.onclick = async () => {
+        const r = await gAct('natale_g_proposta', {p_id:p.id, p_azione:az}, az === 'approva' ? 'Aggiunto alla lista: completa nome, foto e prezzo' : 'Fatto');
+        const g = r && r.regalo_id && (G.regali || []).find(x => x.id === r.regalo_id);
+        if (g) editRegalo(g);
+      }; row.appendChild(b); };
     if (p.stato === 'nuova') { mk('Approva', 'verde', 'approva'); mk('Scarta', 'chiaro', 'scarta'); }
     if (p.stato === 'scartata') mk('Riconsidera', 'chiaro', 'riapri');
     d.appendChild(info); bp.appendChild(d);
