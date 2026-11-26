@@ -133,6 +133,7 @@ section.box p.sub{margin:0 0 12px;color:var(--grigio);font-size:14.5px}
 .btn.verde{background:var(--abete);color:#fff;box-shadow:0 4px 0 var(--abete-2)}
 .btn.chiaro{background:#EEF1F8;color:var(--notte)}
 .btn.link{background:transparent;color:var(--abete);padding:8px 4px;font-weight:500;box-shadow:none}
+.btn.link.elimina{color:var(--velluto)}
 .codice{font-family:var(--f-titolo);font-weight:600;font-size:30px;letter-spacing:3px;text-align:center;color:var(--notte);background:var(--neve);border:2px dashed var(--oro);border-radius:14px;padding:10px 14px;-webkit-user-select:all;user-select:all}
 .codice-box{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;justify-content:space-between;margin-top:14px;padding:12px;border-radius:14px;background:#FFF8E6}
 .codice-box .codice{font-size:24px;padding:6px 12px}
@@ -1105,6 +1106,7 @@ function gRender(){
     bt('Modifica', 'chiaro', () => editRegalo(g));
     bt(g.visibile ? 'Nascondi' : 'Mostra', 'chiaro', () => gAct('natale_g_regalo_salva', {p_dati:{id:g.id, visibile:!g.visibile}}, g.visibile ? 'Nascosto' : 'Visibile'));
     if (p) bt('Libera', 'chiaro', () => { if (confirm(`Togliere la prenotazione di ${p.nome}?`)) gAct('natale_g_prenotazione', {p_id:p.id, p_libera:true}, 'Prenotazione tolta'); });
+    bt('🗑 Elimina', 'link elimina', () => eliminaRegalo(g));
     info.appendChild(row); d.appendChild(info); br.appendChild(d);
   });
   // altri
@@ -1149,6 +1151,18 @@ async function salvaAmazon(id, info, forzaTitolo){
 const msgAmazon = i => !i || !i.ok ? (i && i.errore === 'bloccato' ? 'Amazon ha bloccato la lettura: completa a mano' : 'Non sono riuscito a leggere Amazon: completa a mano')
   : i.prezzo_cent ? 'Presi da Amazon nome, foto e prezzo' : 'Presi da Amazon nome e foto: scrivi tu il prezzo';
 
+// Eliminare un regalo (solo area genitori): sparisce anche la prenotazione e le scelte del gioco su quel regalo
+async function eliminaRegalo(g){
+  const p = g.prenotazione;
+  const msg = p
+    ? `«${g.titolo}» è prenotato da ${p.nome}${p.modo === 'genitori' ? ' (lo comprate voi)' : ''}.\n\nEliminandolo sparisce anche la prenotazione: ${p.nome} non lo vedrà più nel carrello. Conviene avvisarlo.\n\nEliminare definitivamente?`
+    : `Eliminare definitivamente «${g.titolo}»?\n\nNon si può annullare. Per toglierlo solo dalla vista dei parenti usate «Nascondi».`;
+  if (!confirm(msg)) return false;
+  const r = await gAct('natale_g_regalo_elimina', {p_id:g.id}, 'Regalo eliminato');
+  if (r) carica(true);
+  return !!r;
+}
+
 function editRegalo(g, pre, modo){
   const v = g || Object.assign({titolo:'', marca:'', codice:'', eta:'', descrizione:'', amazon_url:'', prezzo_cent:null, prezzo_nota:'', segno_leo:false, visibile:true, categoria:''}, pre || {});
   apriDialog(`<h3>${g ? 'Modifica regalo' : 'Nuovo regalo'}</h3>
@@ -1169,7 +1183,7 @@ function editRegalo(g, pre, modo){
       <div class="row cat-scelta">${CATEGORIE.map(([k, e, n]) => `<label class="check"><input type="checkbox" value="${k}" ${catsOf(v).includes(k) ? 'checked' : ''}> ${e} ${esc(n)}</label>`).join('')}</div>
       <label class="check"><input type="checkbox" id="r-vis" ${v.visibile ? 'checked' : ''}> Visibile ai parenti</label>
       <button class="btn verde full" type="submit">Salva</button>
-      ${g && !g.prenotazione ? '<button class="btn link full" id="r-del" type="button">Elimina definitivamente</button>' : ''}
+      ${g ? '<button class="btn link full elimina" id="r-del" type="button">🗑 Elimina definitivamente</button>' : ''}
     </form>`, b => {
     let daAmazon = null;
     const bA = $('#r-amazon', b), uA = $('#r-url', b);
@@ -1211,7 +1225,7 @@ function editRegalo(g, pre, modo){
     if (modo === 'foto') { try { $('#r-foto', b).click(); } catch(e) {} }
     else if (!g) setTimeout(() => $('#r-titolo', b).focus(), 60);
     const del = $('#r-del', b);
-    if (del) del.onclick = async () => { if (!confirm('Eliminare definitivamente questo regalo?')) return; const r = await gAct('natale_g_regalo_elimina', {p_id:g.id}, 'Eliminato'); if (r) { dlg.close(); carica(true); } };
+    if (del) del.onclick = async () => { if (await eliminaRegalo(g)) dlg.close(); };
   });
 }
 
