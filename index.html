@@ -524,6 +524,7 @@ nav.barra button.leo{color:var(--abete-2)}
 'use strict';
 const API = 'https://smglmkaykgomgehfarqh.supabase.co/rest/v1/rpc/';
 const KEY = 'sb_publishable_J1RZk7DJn7hs49qGfHJ0vg_hLnXWFBV';
+const FN = API.replace('/rest/v1/rpc/', '/functions/v1/');
 const LS = {
   get(k, d){ try { const v = localStorage.getItem('natale.'+k); return v === null ? d : v; } catch(e){ return d; } },
   set(k, v){ try { localStorage.setItem('natale.'+k, v); } catch(e){} },
@@ -1074,8 +1075,16 @@ function gRender(){
     const row = $('.row', info);
     const mk = (t, cls, az) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn mini ' + cls; b.textContent = t;
       b.onclick = async () => {
-        const r = await gAct('natale_g_proposta', {p_id:p.id, p_azione:az}, az === 'approva' ? 'Aggiunto alla lista: completa nome, foto e prezzo' : 'Fatto');
-        const g = r && r.regalo_id && (G.regali || []).find(x => x.id === r.regalo_id);
+        b.disabled = true;
+        const r = await gAct('natale_g_proposta', {p_id:p.id, p_azione:az}, az === 'approva' ? '' : 'Fatto');
+        let g = r && r.regalo_id && (G.regali || []).find(x => x.id === r.regalo_id);
+        if (g && linkAmazon(g.amazon_url || '')) {
+          toast('Aggiunto. Leggo nome e foto da Amazon…');
+          const i = await leggiAmazon(g.amazon_url);
+          if (i.ok) { await salvaAmazon(g.id, i); await gCarica(); g = (G.regali || []).find(x => x.id === r.regalo_id) || g; }
+          toast(msgAmazon(i));
+        } else if (g) toast('Aggiunto alla lista: completa nome, foto e prezzo');
+        b.disabled = false;
         if (g) editRegalo(g);
       }; row.appendChild(b); };
     if (p.stato === 'nuova') { mk('Approva', 'verde', 'approva'); mk('Scarta', 'chiaro', 'scarta'); }
@@ -1125,6 +1134,21 @@ $('#f-imp').onsubmit = async e => {
   if (r && nuovo) { PIN = nuovo; LS.set('pin', nuovo); $('#i-pin').value = ''; }
 };
 
+// Nome, marca, foto (e prezzo, quando Amazon lo mostra) letti dalla pagina Amazon dalla funzione «amazon-info»
+const linkAmazon = u => { try { const h = new URL(u).hostname.replace(/^(www|m|smile)\./, ''); return /^(amazon\.[a-z.]+|amzn\.(eu|to|com)|a\.co)$/.test(h) && !/\/s\?k=/.test(u); } catch(e) { return false; } };
+async function leggiAmazon(url){
+  try {
+    const r = await fetch(FN + 'amazon-info', {method:'POST', headers:{apikey:KEY, 'Content-Type':'application/json'}, body: JSON.stringify({url, pin: PIN})});
+    return await r.json();
+  } catch(e) { return {errore:'rete'}; }
+}
+async function salvaAmazon(id, info, forzaTitolo){
+  return rpc('natale_g_regalo_amazon', {p_pin: PIN, p_id: id, p_dati: {titolo: info.titolo || '', marca: info.marca || '', prezzo_cent: info.prezzo_cent ?? '',
+    foto: info.foto || [], url: info.url || '', forza_titolo: !!forzaTitolo}}).catch(() => ({}));
+}
+const msgAmazon = i => !i || !i.ok ? (i && i.errore === 'bloccato' ? 'Amazon ha bloccato la lettura: completa a mano' : 'Non sono riuscito a leggere Amazon: completa a mano')
+  : i.prezzo_cent ? 'Presi da Amazon nome, foto e prezzo' : 'Presi da Amazon nome e foto: scrivi tu il prezzo';
+
 function editRegalo(g, pre, modo){
   const v = g || Object.assign({titolo:'', marca:'', codice:'', eta:'', descrizione:'', amazon_url:'', prezzo_cent:null, prezzo_nota:'', segno_leo:false, visibile:true, categoria:''}, pre || {});
   apriDialog(`<h3>${g ? 'Modifica regalo' : 'Nuovo regalo'}</h3>
@@ -1133,6 +1157,8 @@ function editRegalo(g, pre, modo){
       <input class="i" id="r-foto" type="file" accept="image/*">
       <label class="f" for="r-titolo">Nome</label><input class="i" id="r-titolo" maxlength="120" required value="${esc(v.titolo)}">
       <label class="f" for="r-url">Link Amazon (o altro negozio)</label><input class="i" id="r-url" type="url" inputmode="url" value="${esc(v.amazon_url)}" placeholder="https://www.amazon.it/dp/…">
+      <button class="btn chiaro full hidden" id="r-amazon" type="button" style="margin-top:8px">🔄 Prendi nome e foto da Amazon</button>
+      <div class="small" id="r-amazon-info"></div>
       <div class="row"><div style="flex:1"><label class="f" for="r-prezzo">Prezzo €</label><input class="i" id="r-prezzo" inputmode="decimal" value="${v.prezzo_cent != null ? (v.prezzo_cent/100).toFixed(2).replace('.', ',') : ''}"></div>
       <div style="flex:1"><label class="f" for="r-eta">Età</label><input class="i" id="r-eta" maxlength="10" value="${esc(v.eta)}"></div></div>
       <label class="f" for="r-nota">Nota sul prezzo (facoltativa)</label><input class="i" id="r-nota" maxlength="60" value="${esc(v.prezzo_nota)}" placeholder="Es. da circa 30 €">
@@ -1145,6 +1171,25 @@ function editRegalo(g, pre, modo){
       <button class="btn verde full" type="submit">Salva</button>
       ${g && !g.prenotazione ? '<button class="btn link full" id="r-del" type="button">Elimina definitivamente</button>' : ''}
     </form>`, b => {
+    let daAmazon = null;
+    const bA = $('#r-amazon', b), uA = $('#r-url', b);
+    const aggA = () => bA.classList.toggle('hidden', !linkAmazon(uA.value.trim()));
+    uA.addEventListener('input', aggA); aggA();
+    bA.onclick = async () => {
+      bA.disabled = true; bA.textContent = 'Leggo la pagina Amazon…';
+      const i = await leggiAmazon(uA.value.trim());
+      bA.disabled = false; bA.textContent = '🔄 Prendi nome e foto da Amazon';
+      if (!i.ok) { toast(msgAmazon(i)); return; }
+      daAmazon = i;
+      const t = $('#r-titolo', b); if (!t.value.trim() || t.value.trim() === 'Gioco da Amazon') t.value = i.titolo;
+      if (!$('#r-marca', b).value.trim() && i.marca) $('#r-marca', b).value = i.marca;
+      if (i.prezzo_cent) { $('#r-prezzo', b).value = (i.prezzo_cent / 100).toFixed(2).replace('.', ','); $('#r-nota', b).value = ''; }
+      if (i.url) uA.value = i.url;
+      $('#r-amazon-info', b).innerHTML = (i.foto || []).length
+        ? `<div class="row" style="gap:6px;margin:8px 0">${i.foto.slice(0, 6).map(f => `<img src="${esc(f)}" alt="" style="width:44px;height:44px;object-fit:contain;background:#fff;border:1px solid var(--linea);border-radius:8px">`).join('')}</div>${i.foto.length} foto da Amazon: si salvano con «Salva».${i.prezzo_cent ? '' : ' Il prezzo Amazon non lo mostra: scrivilo tu.'}`
+        : 'Nessuna foto trovata su Amazon.';
+      toast(msgAmazon(i));
+    };
     $('#f-reg', b).onsubmit = async e => {
       e.preventDefault();
       const btn = $('button[type=submit]', b); btn.disabled = true; btn.textContent = 'Salvataggio…';
@@ -1158,6 +1203,7 @@ function editRegalo(g, pre, modo){
         if (g) dati.id = g.id;
         const f = $('#r-foto', b).files[0]; if (f) dati.foto_dati = await resizeImage(f, 900);
         const r = await gAct('natale_g_regalo_salva', {p_dati:dati}, 'Regalo salvato');
+        if (r && daAmazon && (r.id || (g && g.id))) { await salvaAmazon(r.id || g.id, Object.assign({}, daAmazon, {titolo:'', prezzo_cent:''})); await gCarica(); }
         if (r) { dlg.close(); carica(true); }
       } catch(err) { toast('Errore nel salvataggio'); }
       btn.disabled = false; btn.textContent = 'Salva';
